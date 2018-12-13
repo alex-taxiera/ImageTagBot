@@ -6,7 +6,7 @@
   "author": "Alex Taxiera",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon index.js",
+    "dev": "npx nodemon index.js",
     "start": "node index.js"
   },
   "dependencies": {
@@ -22,7 +22,6 @@
     "eslint-plugin-node": "^8.0.0",
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-standard": "^4.0.0",
-    "imgur": "^0.3.1",
-    "nodemon": "^1.18.8"
+    "imgur": "^0.3.1"
   }
 }

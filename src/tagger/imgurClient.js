@@ -1,35 +1,16 @@
 const imgur = require('imgur')
 
-const TaggerDatabaseManager = require('./TagDatabaseManager')
-
-class ImgurClient {
-  constructor () {
-    this.tdbm = new TaggerDatabaseManager()
+class ImgurManager {
+  constructor (bot) {
+    this.bot = bot
 
     imgur.setClientId(process.env.IMGUR_CLIENT_ID)
     imgur.setAPIUrl('https://api.imgur.com/3/')
   }
 
-  async upload (id, imgObj) {
-    const { data } = await imgur.uploadUrl(imgObj.image)
-
-    try {
-      await this.tdbm.addTag(id, imgObj.key, data.link)
-    } catch (err) {
-      return err
-    }
-  }
-
-  async update (key, imgObj) {
-    const { data } = await imgur.uploadUrl(imgObj)
-
-    try {
-      await this.tdbm.updateTag(key, data.link)
-    } catch (error) {
-      console.log(error)
-      return false
-    }
+  handleTag (tag) {
+    return imgur.uploadUrl(tag.src)
   }
 }
 
-module.exports = ImgurClient
+module.exports = ImgurManager
