@@ -215,8 +215,16 @@ const info = (bot) => new Command(
     },
     run: async function ({ bot, msg, params }) {
       const key = params[0]
-      const tag = await bot.tag.getTag(key)
+      if (!key) return 'Missing key!'
+
+      let tag
+      try {
+        tag = await bot.tag.getTag(key)
+      } catch (error) {
+        return 'The database encountered an error!'
+      }
       if (!tag) return `Tag \`${key}\` doesn't exists`
+
       const user = bot.users.get(tag.userId)
 
       return {
