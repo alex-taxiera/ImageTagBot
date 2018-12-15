@@ -8,7 +8,6 @@ class TagDatabaseManager extends DatabaseManager {
 
   async addTag (userId, key, src) {
     return this._qb.insert({ table: 'tags', data: { userId, key, src } })
-      .catch(() => this._qb.update({ table: 'tags', data: { key, src }, where: { userId } }))
   }
 
   getTag (key) {

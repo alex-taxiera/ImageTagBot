@@ -67,7 +67,7 @@ const add = (bot) => new Command(
         await bot.tag.addTag(msg.author.id, key, uploaded.data.link)
         return `Added \`${key}\``
       } catch (error) {
-        return 'The database encountered an error!'
+        return 'There was a problem updating the database!'
       }
     }
   }
@@ -84,8 +84,16 @@ const remove = (bot) => new Command(
     },
     run: async function ({ bot, msg, params }) {
       const key = params[0]
-      const tag = await bot.tag.getTag(key)
+      if (!key) return 'Missing key!'
+
+      let tag
+      try {
+        tag = await bot.tag.getTag(key)
+      } catch (error) {
+        return 'The database encountered an error!'
+      }
       if (!tag) return 'Tag doesn\'t exist'
+
       if (msg.author.id !== tag.userId) return 'You cannot remove tags you do not own!'
 
       await bot.tag.removeTag(key)
