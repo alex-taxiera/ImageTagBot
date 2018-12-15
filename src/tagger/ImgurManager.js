@@ -6,8 +6,8 @@ class ImgurManager {
     this._imgur.setAPIUrl('https://api.imgur.com/3/')
   }
 
-  upload (tag) {
-    return this._imgur.uploadUrl(tag)
+  upload (url) {
+    return this._imgur.uploadUrl(url)
   }
 }
 
