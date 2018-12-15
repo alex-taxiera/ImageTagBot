@@ -155,7 +155,12 @@ const list = (bot) => new Command(
     name: 'list',
     description: 'List your tags',
     run: async function ({ bot, msg, params }) {
-      const tags = await bot.tag.selectTagsForUser(msg.author.id)
+      let tags
+      try {
+        tags = await bot.tag.selectTagsForUser(msg.author.id)
+      } catch (error) {
+        return 'The database encountered an error!'
+      }
       if (!tags) return 'No tags found for you.'
 
       return {
