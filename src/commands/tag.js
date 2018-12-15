@@ -116,38 +116,34 @@ const update = (bot) => new Command(
       const src = msg.attachments.length > 0 ? msg.attachments[0].url : url
 
       if (!key) return 'Missing key!'
-      const tag = await bot.tag.getTag(key)
-      if (!tag) return 'Tag doesn\'t exist'
-      if (msg.author.id !== tag.userId) return 'You cannot update tags you do not own!'
       if (!src) return 'Please attach an image or specify a url!'
       if (!IMAGE_REGEXP.test(src)) return 'Not an image!'
 
+      let tag
       try {
-        await get(src)
-      } catch (err) {
-        return 'Bad link!'
+        tag = await bot.tag.getTag(key)
+      } catch (error) {
+        return 'The database encountered an error!'
+      }
+      if (!tag) return 'Tag doesn\'t exist'
+
+      if (msg.author.id !== tag.userId) return 'You cannot update tags you do not own!'
+
+      let uploaded
+      try {
+        uploaded = await bot.imgur.upload(src)
+        if (!uploaded.data) {
+          throw Error('No data from imgur')
+        }
+      } catch (error) {
+        return 'There was a problem uploading your image!'
       }
 
       try {
-        const result = await bot.imgur.upload(src)
-        if (!result.data) throw Error('No data from imgur')
-        try {
-          const { data } = result
-          await bot.tag.updateTag(key, data.link)
-          return `Update tag \`${key}\``
-        } catch (error) {
-          console.log(error)
-          switch (key) {
-            default:
-              return `An unknown error occurred \`${error.message}\``
-          }
-        }
+        await bot.tag.updateTag(msg.author.id, key, uploaded.data.link)
+        return `Update tag \`${key}\``
       } catch (error) {
-        console.log(error)
-        switch (key) {
-          default:
-            return `An unknown error occurred \`${error.message}\``
-        }
+        return 'There was a problem updating the database!'
       }
     }
   }
