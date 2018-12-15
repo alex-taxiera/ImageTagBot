@@ -6,7 +6,7 @@ class TaggerClient extends DataClient {
   constructor (opt = {}) {
     super(opt)
     this.tag = new TagDatabaseManager()
-    this.imgur = new ImgurManager(this)
+    this.imgur = new ImgurManager()
   }
 }
 

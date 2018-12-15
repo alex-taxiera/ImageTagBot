@@ -40,19 +40,32 @@ const add = (bot) => new Command(
     run: async function ({ bot, msg, params }) {
       const [key, url] = params
       const src = msg.attachments.length > 0 ? msg.attachments[0].url : url
+      const tag = await bot.tag.getTag(key)
 
       if (!key) return 'Missing key!'
+      if (tag) return `Tag \`${key}\` already exists`
       if (!src) return 'Please attach an image or specify a url!'
       if (!IMAGE_REGEXP.test(src.toLowerCase())) return 'Not an image!'
 
-      const result = await bot.imgur.handleTag({ key, src })
-
-      if (result.data) {
+      try {
+        const result = await bot.imgur.upload(src)
+        if (!result.data) throw Error('No data from imgur')
         try {
-          await bot.tag.addTag(msg.author.id, key, result.data.link)
+          const { data } = result
+          await bot.tag.addTag(msg.author.id, key, data.link)
           return `Added \`${key}\``
         } catch (error) {
-          return `Tag \`${key}\` already exists`
+          console.log(error)
+          switch (error.code) {
+            default:
+              return `An unkown error occurred \`${error.message}\``
+          }
+        }
+      } catch (error) {
+        console.log(error)
+        switch (error.code) {
+          default:
+            return `An unknown error has occurred \`${error.message}\``
         }
       }
     }
@@ -106,14 +119,25 @@ const update = (bot) => new Command(
         return 'Bad link!'
       }
 
-      const result = await bot.imgur.handleTag({ key, src })
-
-      if (result.data) {
+      try {
+        const result = await bot.imgur.upload(src)
+        if (!result.data) throw Error('No data from imgur')
         try {
-          await bot.tag.updateTag(key, result.data.link)
-          return `Updated tag \`${key}\``
+          const { data } = result
+          await bot.tag.updateTag(key, data.link)
+          return `Update tag \`${key}\``
         } catch (error) {
           console.log(error)
+          switch (key) {
+            default:
+              return `An unknown error occurred \`${error.message}\``
+          }
+        }
+      } catch (error) {
+        console.log(error)
+        switch (key) {
+          default:
+            return `An unknown error occurred \`${error.message}\``
         }
       }
     }
