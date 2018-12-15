@@ -40,33 +40,34 @@ const add = (bot) => new Command(
     run: async function ({ bot, msg, params }) {
       const [key, url] = params
       const src = msg.attachments.length > 0 ? msg.attachments[0].url : url
-      const tag = await bot.tag.getTag(key)
 
       if (!key) return 'Missing key!'
-      if (tag) return `Tag \`${key}\` already exists`
       if (!src) return 'Please attach an image or specify a url!'
       if (!IMAGE_REGEXP.test(src.toLowerCase())) return 'Not an image!'
 
+      let exists
       try {
-        const result = await bot.imgur.upload(src)
-        if (!result.data) throw Error('No data from imgur')
-        try {
-          const { data } = result
-          await bot.tag.addTag(msg.author.id, key, data.link)
-          return `Added \`${key}\``
-        } catch (error) {
-          console.log(error)
-          switch (error.code) {
-            default:
-              return `An unkown error occurred \`${error.message}\``
-          }
+        exists = await bot.tag.getTag(key)
+      } catch (error) {
+        return 'The database encountered an error!'
+      }
+      if (exists) return `Tag \`${key}\` already exists`
+
+      let uploaded
+      try {
+        uploaded = await bot.imgur.upload(src)
+        if (!uploaded.data) {
+          throw Error('No data from imgur')
         }
       } catch (error) {
-        console.log(error)
-        switch (error.code) {
-          default:
-            return `An unknown error has occurred \`${error.message}\``
-        }
+        return 'There was a problem uploading your image!'
+      }
+
+      try {
+        await bot.tag.addTag(msg.author.id, key, uploaded.data.link)
+        return `Added \`${key}\``
+      } catch (error) {
+        return 'The database encountered an error!'
       }
     }
   }
