@@ -184,12 +184,19 @@ const search = (bot) => new Command(
     },
     run: async function ({ bot, msg, params }) {
       const query = params[0]
-      const tags = await bot.tag.searchLikeTags(query)
+      if (!query) return 'No query!'
+
+      let tags
+      try {
+        tags = await bot.tag.searchLikeTags(query)
+      } catch (error) {
+        return 'The database encountered an error!'
+      }
       if (!tags || tags.length < 1) return 'No tags found.'
 
       return {
         embed: {
-          title: 'Search results',
+          title: 'Search Results',
           description: tags.map(({ key }) => key).join('\n')
         }
       }
