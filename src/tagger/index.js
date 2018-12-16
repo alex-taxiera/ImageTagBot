@@ -1,6 +1,6 @@
 const { DataClient } = require('eris-boiler')
 const TagDatabaseManager = require('./TagDatabaseManager')
-const ImgurManager = require('./imgurClient')
+const ImgurManager = require('./ImgurManager')
 
 class TaggerClient extends DataClient {
   constructor (opt = {}) {

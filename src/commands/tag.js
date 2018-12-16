@@ -140,7 +140,7 @@ const update = (bot) => new Command(
       }
 
       try {
-        await bot.tag.updateTag(msg.author.id, key, uploaded.data.link)
+        await bot.tag.updateTag(key, uploaded.data.link)
         return `Update tag \`${key}\``
       } catch (error) {
         return 'There was a problem updating the database!'
