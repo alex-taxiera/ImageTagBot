@@ -1,7 +1,7 @@
 const { Command } = require('eris-boiler')
 const { get } = require('superagent')
 
-const IMAGE_REGEXP = new RegExp(/^(https|http):?\/(.*).(png|jpeg|jpg|gif)/)
+const IMAGE_REGEXP = new RegExp(/^(https|http):?\/(.*).(png|jpeg|jpg|gif|gifv)/)
 
 module.exports = (bot) => new Command(
   bot,
@@ -43,25 +43,32 @@ const add = (bot) => new Command(
 
       if (!key) return 'Missing key!'
       if (!src) return 'Please attach an image or specify a url!'
-      if (!IMAGE_REGEXP.test(src)) return 'Not an image!'
+      if (!IMAGE_REGEXP.test(src.toLowerCase())) return 'Not an image!'
 
+      let exists
       try {
-        await get(src)
-      } catch (err) {
-        return 'Bad link!'
+        exists = await bot.tag.getTag(key)
+      } catch (error) {
+        return 'The database encountered an error!'
+      }
+      if (exists) return `Tag \`${key}\` already exists`
+
+      let uploaded
+      try {
+        uploaded = await bot.imgur.upload(src)
+        if (!uploaded.data) {
+          throw Error('No data from imgur')
+        }
+      } catch (error) {
+        return 'There was a problem uploading your image!'
       }
 
-      return bot.tag.addTag(msg.author.id, key, src)
-        .then(() => `Added tag \`${key}\``)
-        .catch((error) => {
-          switch (error.code) {
-            case 'ER_DUP_ENTRY':
-              return `Tag \`${key}\` already exists!`
-            default:
-              console.error(error)
-              return 'Something went wrong adding this tag, sorry!'
-          }
-        })
+      try {
+        await bot.tag.addTag(msg.author.id, key, uploaded.data.link)
+        return `Added \`${key}\``
+      } catch (error) {
+        return 'There was a problem updating the database!'
+      }
     }
   }
 )
@@ -77,8 +84,16 @@ const remove = (bot) => new Command(
     },
     run: async function ({ bot, msg, params }) {
       const key = params[0]
-      const tag = await bot.tag.getTag(key)
+      if (!key) return 'Missing key!'
+
+      let tag
+      try {
+        tag = await bot.tag.getTag(key)
+      } catch (error) {
+        return 'The database encountered an error!'
+      }
       if (!tag) return 'Tag doesn\'t exist'
+
       if (msg.author.id !== tag.userId) return 'You cannot remove tags you do not own!'
 
       await bot.tag.removeTag(key)
@@ -101,20 +116,35 @@ const update = (bot) => new Command(
       const src = msg.attachments.length > 0 ? msg.attachments[0].url : url
 
       if (!key) return 'Missing key!'
-      const tag = await bot.tag.getTag(key)
-      if (!tag) return 'Tag doesn\'t exist'
-      if (msg.author.id !== tag.userId) return 'You cannot update tags you do not own!'
       if (!src) return 'Please attach an image or specify a url!'
       if (!IMAGE_REGEXP.test(src)) return 'Not an image!'
 
+      let tag
       try {
-        await get(src)
-      } catch (err) {
-        return 'Bad link!'
+        tag = await bot.tag.getTag(key)
+      } catch (error) {
+        return 'The database encountered an error!'
+      }
+      if (!tag) return 'Tag doesn\'t exist'
+
+      if (msg.author.id !== tag.userId) return 'You cannot update tags you do not own!'
+
+      let uploaded
+      try {
+        uploaded = await bot.imgur.upload(src)
+        if (!uploaded.data) {
+          throw Error('No data from imgur')
+        }
+      } catch (error) {
+        return 'There was a problem uploading your image!'
       }
 
-      await bot.tag.updateTag(key, src)
-      return `Updated tag \`${key}\``
+      try {
+        await bot.tag.updateTag(key, uploaded.data.link)
+        return `Update tag \`${key}\``
+      } catch (error) {
+        return 'There was a problem updating the database!'
+      }
     }
   }
 )
@@ -125,7 +155,12 @@ const list = (bot) => new Command(
     name: 'list',
     description: 'List your tags',
     run: async function ({ bot, msg, params }) {
-      const tags = await bot.tag.selectTagsForUser(msg.author.id)
+      let tags
+      try {
+        tags = await bot.tag.selectTagsForUser(msg.author.id)
+      } catch (error) {
+        return 'The database encountered an error!'
+      }
       if (!tags) return 'No tags found for you.'
 
       return {
@@ -149,12 +184,19 @@ const search = (bot) => new Command(
     },
     run: async function ({ bot, msg, params }) {
       const query = params[0]
-      const tags = await bot.tag.searchLikeTags(query)
+      if (!query) return 'No query!'
+
+      let tags
+      try {
+        tags = await bot.tag.searchLikeTags(query)
+      } catch (error) {
+        return 'The database encountered an error!'
+      }
       if (!tags || tags.length < 1) return 'No tags found.'
 
       return {
         embed: {
-          title: 'Search results',
+          title: 'Search Results',
           description: tags.map(({ key }) => key).join('\n')
         }
       }
@@ -173,8 +215,16 @@ const info = (bot) => new Command(
     },
     run: async function ({ bot, msg, params }) {
       const key = params[0]
-      const tag = await bot.tag.getTag(key)
+      if (!key) return 'Missing key!'
+
+      let tag
+      try {
+        tag = await bot.tag.getTag(key)
+      } catch (error) {
+        return 'The database encountered an error!'
+      }
       if (!tag) return `Tag \`${key}\` doesn't exists`
+
       const user = bot.users.get(tag.userId)
 
       return {
