@@ -22,6 +22,10 @@ class TagDatabaseManager extends DatabaseManager {
     return this._qb.delete({ table: 'tags', where: { key } })
   }
 
+  selectAllTags () {
+    return this._qb.select({ table: 'tags' })
+  }
+
   selectTagsForUser (userId) {
     return this._qb.select({ table: 'tags', where: { userId } })
   }

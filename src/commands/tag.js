@@ -165,8 +165,8 @@ const list = (bot) => new Command(
 
       return {
         embed: {
-          title: `${msg.author.username} Tags.`,
-          description: tags.map(({ key }) => key).join('\n')
+          title: `${msg.author.username}'s Tags`,
+          description: tags.map(({ key, count }) => `${key} (${count})`).join('\n')
         }
       }
     }
@@ -248,6 +248,33 @@ const info = (bot) => new Command(
               value: tag.count
             }
           ]
+        }
+      }
+    }
+  }
+)
+
+const top = (bot) => new Command(
+  bot,
+  {
+    name: 'top',
+    description: 'top 10 tags',
+    run: async ({ bot }) => {
+      let tags
+      try {
+        tags = await bot.tag.selectAllTags()
+      } catch (error) {
+        return 'The database encountered an error!'
+      }
+      if (!tags || tags.length < 1) return 'No tags found.'
+
+      return {
+        embed: {
+          title: 'Top 10 Tags!',
+          description: tags
+            .sort(({ count: a }, { count: b }) => a - b)
+            .map(({ key, count }) => `${key} (${count})`)
+            .join('\n')
         }
       }
     }
