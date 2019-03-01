@@ -260,7 +260,7 @@ const top = (bot) => new Command(
     name: 'top',
     description: 'top 10 tags',
     options: {
-      deleteInvoking: false
+      deleteResponse: false
     },
     run: async ({ bot }) => {
       let tags
