@@ -259,6 +259,9 @@ const top = (bot) => new Command(
   {
     name: 'top',
     description: 'top 10 tags',
+    options: {
+      deleteInvoking: false
+    },
     run: async ({ bot }) => {
       let tags
       try {
