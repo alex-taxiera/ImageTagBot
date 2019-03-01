@@ -12,7 +12,7 @@ module.exports = (bot) => new Command(
       parameters: ['query'],
       deleteInvoking: false,
       deleteResponse: false,
-      subCommands: [add, remove, update, list, search, info]
+      subCommands: [add, remove, update, list, search, info, top]
     },
     run: async function ({ bot, msg, params }) {
       const key = params[0]
