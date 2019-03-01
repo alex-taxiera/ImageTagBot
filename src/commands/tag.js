@@ -273,7 +273,7 @@ const top = (bot) => new Command(
           title: 'Top 10 Tags!',
           description: tags
             .sort(({ count: a }, { count: b }) => b - a)
-            .slice(10)
+            .slice(0, 10)
             .map(({ key, count }) => `${key} (${count})`)
             .join('\n')
         }
