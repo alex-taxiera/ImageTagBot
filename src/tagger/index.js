@@ -3,10 +3,11 @@ const TagDatabaseManager = require('./TagDatabaseManager')
 const ImgurManager = require('./ImgurManager')
 
 class TaggerClient extends DataClient {
-  constructor (opt = {}) {
-    super(opt)
-    this.tag = new TagDatabaseManager()
+  constructor (token, options = {}) {
+    options.databaseManager = new TagDatabaseManager(options.dbInfo)
+    super(token, options)
     this.imgur = new ImgurManager()
+    this.IMAGE_REGEXP = new RegExp(/^(https|http):?\/(.*).(png|jpeg|jpg|gif|gifv)/)
   }
 }
 

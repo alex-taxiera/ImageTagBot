@@ -1,8 +1,12 @@
 {
-  "prefix": "##",
-  "status": {
-    "name": "with your granddads clothes",
-    "type": 0
+  "oratorOptions": {
+    "defaultPrefix": "##"
   },
-  "rotateStatus": true
+  "statusManagerOptions": {
+    "defaultStatus": {
+      "name": "with your granddads clothes",
+      "type": 0
+    },
+    "mode": "random"
+  }
 }

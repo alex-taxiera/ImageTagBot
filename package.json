@@ -7,22 +7,23 @@
   "license": "MIT",
   "scripts": {
     "dev": "npx nodemon index.js",
-    "start": "node index.js"
+    "start": "node src/index.js"
   },
   "dependencies": {
-    "dotenv": "^6.2.0",
-    "eris-boiler": "github:alex-taxiera/eris-boiler#master",
+    "dotenv": "^8.1.0",
+    "eris": "^0.10.1",
+    "eris-boiler": "github:alex-taxiera/eris-boiler",
+    "imgur": "^0.3.1",
     "mysql": "github:mysqljs/mysql",
-    "pg": "^7.7.1",
-    "superagent": "^4.0.0-beta.5"
+    "pg": "^7.12.1",
+    "superagent": "^5.1.0"
   },
   "devDependencies": {
-    "eslint": "^5.9.0",
-    "eslint-config-standard": "^12.0.0",
-    "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-node": "^8.0.0",
-    "eslint-plugin-promise": "^4.0.1",
-    "eslint-plugin-standard": "^4.0.0",
-    "imgur": "^0.3.1"
+    "eslint": "^6.5.1",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-node": "^10.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1"
   }
 }

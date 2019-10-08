@@ -1,9 +1,8 @@
-const { DatabaseManager, Logger } = require('eris-boiler')
-const QueryBuilder = require('simple-knex')
+const { SQLManager } = require('eris-boiler')
 
-class TagDatabaseManager extends DatabaseManager {
-  constructor () {
-    super({}, Logger, QueryBuilder)
+class TagDatabaseManager extends SQLManager {
+  constructor (dbInfo) {
+    super({ dbInfo })
   }
 
   async addTag (userId, key, src) {
