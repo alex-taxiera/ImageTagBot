@@ -1,23 +1,22 @@
-const { SQLManager } = require('eris-boiler')
+import {
+  SQLManager
+} from 'eris-boiler'
 
-class TagDatabaseManager extends SQLManager {
-  constructor (dbInfo) {
-    super({ dbInfo })
-  }
+export class TagDatabaseManager extends SQLManager {
 
-  async addTag (userId, key, src) {
+  async addTag (userId: string, key: string, src: string) {
     return this._qb.insert({ table: 'tags', data: { userId, key, src } })
   }
 
-  getTag (key) {
+  getTag (key: string) {
     return this._qb.get({ table: 'tags', where: { key } })
   }
 
-  updateTag (key, src) {
+  updateTag (key: string, src: string) {
     return this._qb.update({ table: 'tags', data: { src }, where: { key } })
   }
 
-  removeTag (key) {
+  removeTag (key: string) {
     return this._qb.delete({ table: 'tags', where: { key } })
   }
 
@@ -25,18 +24,16 @@ class TagDatabaseManager extends SQLManager {
     return this._qb.select({ table: 'tags' })
   }
 
-  selectTagsForUser (userId) {
+  selectTagsForUser (userId: string) {
     return this._qb.select({ table: 'tags', where: { userId } })
   }
 
-  searchLikeTags (key) {
+  searchLikeTags (key: string) {
     return this._qb._knex('tags').select('*').where('key', 'like', `%${key}%`)
-      .then((rows) => rows[0] ? rows : [])
+      .then((rows: Array<any>) => rows.length ? rows : [])
   }
 
-  incrementTagCount (key) {
+  incrementTagCount (key: string) {
     return this._qb.increment({ table: 'tags', column: 'count', amount: 1, where: { key } })
   }
 }
-
-module.exports = TagDatabaseManager

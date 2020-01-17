@@ -1,5 +1,4 @@
 const { Command } = require('eris-boiler')
-const { get } = require('superagent')
 
 const add = require('./add')
 const remove = require('./remove')
