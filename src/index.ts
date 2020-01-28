@@ -1,23 +1,23 @@
 import {
   join
 } from 'path'
-
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config()
-}
+import {
+  SQLManager
+} from 'eris-boiler'
 
 import { ENV } from './types/env'
 import {
   TaggerClient
 } from '@tagger'
-import {
-  TagDatabaseManager
-} from '@database-manager'
 
 import {
   oratorOptions,
   statusManagerOptions
 } from './config'
+
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
 
 const {
   TAG_DISCORD_TOKEN,
@@ -31,7 +31,9 @@ const {
 } = (process.env as unknown) as ENV
 
 const bot = new TaggerClient(TAG_DISCORD_TOKEN, TAG_IMGUR_CLIENT_ID, {
-  databaseManager: new TagDatabaseManager({
+  oratorOptions,
+  statusManagerOptions,
+  databaseManager: new SQLManager({
     connectionInfo: TAG_DB_CONNECTION || {
       database: TAG_DB_NAME,
       user: TAG_DB_USER,
@@ -39,9 +41,7 @@ const bot = new TaggerClient(TAG_DISCORD_TOKEN, TAG_IMGUR_CLIENT_ID, {
       host: TAG_DB_HOST
     },
     client: TAG_DB_CLIENT
-  }),
-  oratorOptions,
-  statusManagerOptions
+  })
 })
 
 bot
