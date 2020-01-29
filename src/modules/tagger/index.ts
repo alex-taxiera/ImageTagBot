@@ -10,7 +10,7 @@ import {
   DataClientOptions,
   DatabaseObject
 } from 'eris-boiler'
-import * as imgur from 'imgur'
+import request from '@http'
 
 export type TagDatabaseConfig = {
   connection: ConnectionData
@@ -21,58 +21,77 @@ export type TaggerClientOptions = {
   statusManagerOptions?: StatusManagerOptions
 }
 export class TaggerClient extends DataClient {
-  private readonly api = imgur
+  private readonly API_URL = 'https://api.imgur.com/3'
+  private readonly imgurClientId: string
   public readonly IMAGE_REGEXP = /^(https|http):?\/(.*).(png|jpeg|jpg|gif|gifv)/
 
-  constructor (token: string, imgurClientId: string, options?: DataClientOptions) {
+  constructor (
+    token: string,
+    imgurClientId: string,
+    options?: DataClientOptions
+  ) {
     super(token, options)
-    this.api.setAPIUrl('https://api.imgur.com/3/')
-    this.api.setClientId(imgurClientId)
+    this.imgurClientId = imgurClientId
   }
 
-  uploadToImgur (url: string): Promise<any> {
-    return this.api.uploadUrl(url)
+  public async uploadToImgur (src: string): Promise<string> {
+    const { body } = await request(`${this.API_URL}/upload`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Client-ID ${this.imgurClientId}`
+      },
+      body: src
+    })
+
+    const res = JSON.parse(body.toString())
+    if (res.data.error) {
+      throw Error(res.data.error)
+    }
+    return res.data.link
   }
 
-  async upsertTag (key: string, data: { key?: string; src?: string; userId?: string; count?: number }): Promise<DatabaseObject> {
-    const tag = await this.getTag(key)
+  public async upsertTag (
+    id: string,
+    data: { id?: string; src?: string; user?: string; count?: number }
+  ): Promise<DatabaseObject> {
+    const tag = await this.getTag(id)
     if (tag) {
       return tag.save(data)
     }
 
-    return this.dbm.newObject('tag', { key, ...data }).save()
+    return this.dbm.newObject('tag', { id, ...data }).save()
   }
-  
-  async removeTag (key: string): Promise<void> {
-    const tag = await this.getTag(key)
+
+  public async removeTag (id: string): Promise<void> {
+    const tag = await this.getTag(id)
     if (tag) {
       return tag.delete()
     }
   }
 
-  getTag (key: string): Promise<DatabaseObject | void> {
-    return this.dbm.newQuery('tag').get(key, 'key')
+  public getTag (id: string): Promise<DatabaseObject | void> {
+    return this.dbm.newQuery('tag').get(id, 'id')
   }
 
-  getTags (): Promise<Array<DatabaseObject>> {
+  public getTags (): Promise<Array<DatabaseObject>> {
     return this.dbm.newQuery('tag').find()
   }
 
-  getTagsForUser (userId: string): Promise<Array<DatabaseObject>> {
-    return this.dbm.newQuery('key').equalTo('userId', userId).find()
+  public getTagsForUser (user: string): Promise<Array<DatabaseObject>> {
+    return this.dbm.newQuery('id').equalTo('user', user).find()
   }
 
-  async searchSuggestions (key: string): Promise<Array<DatabaseObject>> {
+  public async searchSuggestions (id: string): Promise<Array<DatabaseObject>> {
     const tags = await this.getTags()
 
-    return tags.filter((tag) => tag.get('key').includes(key))
+    return tags.filter((tag) => tag.get('id').includes(id))
   }
 
-  async incrementTagCount (key: string): Promise<number | void> {
-    const tag = await this.getTag(key)
+  public async incrementTagCount (id: string): Promise<number | void> {
+    const tag = await this.getTag(id)
     if (tag) {
       const count = tag.get('count') + 1
-      await this.upsertTag(key, { count })
+      await this.upsertTag(id, { count })
       return count
     }
   }

@@ -22,7 +22,7 @@ export default new Command({
       return {
         embed: {
           title: 'Search Results',
-          description: tags.map((dbo) => dbo.get('key')).join('\n')
+          description: tags.map((dbo) => dbo.get('id')).join('\n')
         }
       }
     })

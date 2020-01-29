@@ -7,22 +7,22 @@ export default new Command({
   description: 'Add a tag',
   options: {
     aliases: [ 'delete', 'del', 'rm' ],
-    parameters: [ 'tag key' ],
+    parameters: [ 'tag id' ],
     permission: ownTag
   },
   run: function (bot, { params }): CommandResults {
-    const key = params[0]
-    if (!key) {
-      return 'Missing key!'
+    const id = params[0]
+    if (!id) {
+      return 'Missing id!'
     }
 
-    return bot.getTag(key).then(async (tag) => {
+    return bot.getTag(id).then(async (tag) => {
       if (!tag) {
         return 'Tag doesn\'t exist'
       }
 
-      await bot.removeTag(key)
-      return `Deleted tag \`${key}\``
+      await bot.removeTag(id)
+      return `Deleted tag \`${id}\``
     })
   }
 })

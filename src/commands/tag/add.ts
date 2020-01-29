@@ -6,14 +6,14 @@ export default new Command({
   description: 'Add a tag',
   options: {
     aliases: [ 'create' ],
-    parameters: [ 'tag key' ]
+    parameters: [ 'tag id' ]
   },
   run: function (bot, { msg, params }): CommandResults {
-    const [ key, url ] = params
+    const [ id, url ] = params
     const src = msg.attachments.length > 0 ? msg.attachments[0].url : url
 
-    if (!key) {
-      return 'Missing key!'
+    if (!id) {
+      return 'Missing id!'
     }
     if (!src) {
       return 'Please attach an image or specify a url!'
@@ -22,14 +22,14 @@ export default new Command({
       return 'Not an image!'
     }
 
-    return bot.getTag(key).then(async (tag) => {
+    return bot.getTag(id).then(async (tag) => {
       if (tag) {
-        return `Tag \`${key}\` already exists`
+        return `Tag \`${id}\` already exists`
       }
 
-      const newTag = await bot.uploadToImgur(src)
-      await bot.upsertTag(key, { userId: msg.author.id, src: newTag.data.link })
-      return `Added \`${key}\``
+      const newSrc = await bot.uploadToImgur(src)
+      await bot.upsertTag(id, { user: msg.author.id, src: newSrc })
+      return `Added \`${id}\``
     })
   }
 })

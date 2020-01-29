@@ -6,17 +6,17 @@ export default new Command({
   description: 'Get info on a tag.',
   options: {
     aliases: [ 'about' ],
-    parameters: [ 'tag key' ]
+    parameters: [ 'tag id' ]
   },
   run: function (bot, { params }): CommandResults {
-    const key = params[0]
-    if (!key) {
-      return 'Missing key!'
+    const id = params[0]
+    if (!id) {
+      return 'Missing id!'
     }
 
-    return bot.getTag(key).then((tag) => {
+    return bot.getTag(id).then((tag) => {
       if (!tag) {
-        return `Tag \`${key}\` doesn't exist`
+        return `Tag \`${id}\` doesn't exist`
       }
 
       const user = bot.users.get(tag.get('user'))
@@ -32,7 +32,7 @@ export default new Command({
           fields: [
             {
               name: 'Tag Name',
-              value: tag.get('key')
+              value: tag.get('id')
             },
             {
               name: 'Tag Source',

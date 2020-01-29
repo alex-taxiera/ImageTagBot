@@ -7,10 +7,20 @@ const requesters = {
   'https:': https
 }
 
+export interface Response {
+  req: http.ClientRequest
+  res: http.IncomingMessage
+  body: Buffer
+}
+
+export interface Options extends http.RequestOptions {
+  body?: string
+}
+
 export default function request (
   url: string,
-  options: any = {}
-): Promise<{ req: http.ClientRequest; res: http.IncomingMessage; body: Buffer }> {
+  options: Options = {}
+): Promise<Response> {
   const {
     method = 'GET'
   } = options
