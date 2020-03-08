@@ -43,11 +43,11 @@ export class TaggerClient extends DataClient {
       body: src
     })
 
-    const res = JSON.parse(body.toString())
-    if (res.data.error) {
-      throw Error(res.data.error)
+    const { data: { error, link } } = JSON.parse(body.toString())
+    if (error) {
+      throw Error(error)
     }
-    return res.data.link
+    return link
   }
 
   public async upsertTag (
@@ -78,7 +78,7 @@ export class TaggerClient extends DataClient {
   }
 
   public getTagsForUser (user: string): Promise<Array<DatabaseObject>> {
-    return this.dbm.newQuery('id').equalTo('user', user).find()
+    return this.dbm.newQuery('tag').equalTo('user', user).find()
   }
 
   public async searchSuggestions (id: string): Promise<Array<DatabaseObject>> {

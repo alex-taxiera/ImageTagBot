@@ -24,7 +24,7 @@ export default new Command({
     subCommands: [ add, remove, update, list, search, info, top ]
   },
   run: (bot, { params }): CommandResults => {
-    const query = params[0]
+    const query = params.join(' ')
     return bot.getTag(query).then(async (tag) => {
       if (!tag) {
         return `Tag \`${query}\` doesn't exists`
