@@ -2,9 +2,6 @@ import {
   join
 } from 'path'
 import {
-  load
-} from 'docker-secret-env'
-import {
   SQLManager
 } from 'eris-boiler'
 
@@ -18,8 +15,9 @@ import {
   statusManagerOptions
 } from './config'
 
-load()
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV === 'production') {
+  require('docker-secret-env').load()
+} else {
   require('dotenv').config()
 }
 
