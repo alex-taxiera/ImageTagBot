@@ -1,7 +1,7 @@
 import {
-  CommandResults
-   DatabaseObject
-  } from 'eris-boiler'
+  CommandResults,
+  DatabaseObject
+} from 'eris-boiler'
 import {
   Command
 } from '@tagger'
