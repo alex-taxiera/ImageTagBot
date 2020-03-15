@@ -41,7 +41,16 @@ export default function request (
       ...reqOptions
     } = options
 
-    const req = protocol.request(address, { ...reqOptions, method }, (res) => {
+    const req = protocol.request(address, { ...reqOptions, method })
+    if (body) {
+      req.write(body)
+    }
+    req.end()
+
+    req.on('error', reject)
+    req.on('response', (res) => {
+      res.on('aborted', reject)
+      res.on('error', reject)
       const chunks: Array<Buffer> = []
       res.on('data', (chunk: Buffer) => chunks.push(chunk))
       res.on('end', () => {
@@ -52,11 +61,5 @@ export default function request (
         }
       })
     })
-
-    req.on('error', reject)
-    if (body) {
-      req.write(body)
-    }
-    req.end()
   })
 }
