@@ -11,15 +11,23 @@ export default new Command({
   run: function (bot, { msg, params }): CommandResults {
     const [ id, url ] = params
     const src = msg.attachments.length > 0 ? msg.attachments[0].url : url
-
+    /* eslint-disable */
+    console.log('id :', id)
+    console.log('url :', url)
+    console.log('src :', src)
     if (!id) {
       return 'Missing id!'
     }
     if (!src) {
       return 'Please attach an image or specify a url!'
     }
-    if (!bot.IMAGE_REGEXP.test(src.toLowerCase())) {
-      return 'Not an image!'
+    try {
+      if (!bot.IMAGE_REGEXP.test(src.toLowerCase())) {
+        return 'Not an image!'
+      }
+    } catch (e) {
+      console.log('here', e)
+      throw e
     }
 
     return bot.getTag(id).then(async (tag) => {
