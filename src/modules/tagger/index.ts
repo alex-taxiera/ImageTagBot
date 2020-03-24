@@ -45,6 +45,8 @@ export class TaggerClient extends DataClient {
 
     const { data: { error, link } } = JSON.parse(body.toString())
     if (error) {
+      /* eslint-disable */
+      console.log('error :', error)
       throw Error(error)
     }
     return link
