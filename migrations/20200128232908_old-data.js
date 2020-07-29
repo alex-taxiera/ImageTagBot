@@ -506,11 +506,11 @@ const data = [
 ]
 
 exports.up = (knex) => {
-  return knex('tag').insert(data)
+  // return knex('tag').insert(data)
 }
 
 exports.down = (knex) => {
-  return knex('tag')
-    .whereIn('id', data.map((d) => d.id))
-    .del()
+  // return knex('tag')
+  //   .whereIn('id', data.map((d) => d.id))
+  //   .del()
 }
