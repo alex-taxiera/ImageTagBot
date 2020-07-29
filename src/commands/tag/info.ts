@@ -24,23 +24,24 @@ export default new Command({
         embed: {
           author: {
             name: `${user?.username ?? 'ERR'}#${user?.discriminator ?? 'ERR'}`,
-            icon_url: user?.avatarURL // eslint-disable-line @typescript-eslint/camelcase
+            icon_url: user?.avatarURL
           },
           thumbnail: {
-            url: bot.IMAGE_REGEXP.test(tag.get('src')) ? tag.get('src') : ''
+            url: bot.IMAGE_REGEXP
+              .test(<string>tag.get('src')) ? <string>tag.get('src') : ''
           },
           fields: [
             {
               name: 'Tag Name',
-              value: tag.get('id')
+              value: <string>tag.get('id')
             },
             {
               name: 'Tag Source',
-              value: tag.get('src')
+              value: <string>tag.get('src')
             },
             {
               name: 'Use Count',
-              value: tag.get('count')
+              value: <string>tag.get('count')
             }
           ]
         }

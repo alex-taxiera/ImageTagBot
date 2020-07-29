@@ -48,3 +48,5 @@ const bot = new TaggerClient(DISCORD_TOKEN, IMGUR_CLIENT_ID, {
 bot
   .addCommands(join(__dirname, 'commands'))
   .connect()
+  // eslint-disable-next-line no-console
+  .catch(console.error)

@@ -10,7 +10,11 @@ import {
   DataClientOptions,
   DatabaseObject
 } from 'eris-boiler'
-import request from '@http'
+import FormData from 'form-data'
+import fetch from 'node-fetch'
+
+import { ImgurError, ImgurException } from './exceptions'
+import { streamFromBuffer } from '@file'
 
 export type TagDatabaseConfig = {
   connection: ConnectionData
@@ -23,7 +27,7 @@ export type TaggerClientOptions = {
 export class TaggerClient extends DataClient {
   private readonly API_URL = 'https://api.imgur.com/3'
   private readonly imgurClientId: string
-  public readonly IMAGE_REGEXP = /^(https|http):?\/(.*).(png|jpeg|jpg|gif|gifv)/
+  public readonly IMAGE_REGEXP = /^(?:https|http):?\/.*\.(\w+)/
 
   constructor (
     token: string,
@@ -34,21 +38,50 @@ export class TaggerClient extends DataClient {
     this.imgurClientId = imgurClientId
   }
 
-  public async uploadToImgur (src: string): Promise<string> {
-    const { body } = await request(`${this.API_URL}/upload`, {
+  public async uploadToImgur (
+    src: string,
+    type: 'image' | 'video' = 'image',
+    title: string = 'Cool Image'
+  ): Promise<string> {
+    const res = await fetch(src)
+    const data = await res.buffer()
+    const size = Buffer.byteLength(data)
+
+    if (size > 1024 * 1024 * (type === 'image' ? 10 : 200)) {
+      throw Error('File is too big!')
+    }
+
+    const stream = streamFromBuffer(data)
+    const form = new FormData()
+    form.append('title', title)
+    form.append(type, stream, {
+      filename: 'test.gif',
+      contentType: res.headers.get('content-type') ?? undefined,
+      knownLength: size
+    })
+    form.append('type', 'file')
+
+    const body = await fetch(`${this.API_URL}/upload`, {
       method: 'POST',
       headers: {
+        ...form.getHeaders(),
         Authorization: `Client-ID ${this.imgurClientId}`
       },
-      body: src
-    })
+      body: form
+    }).then((res) =>
+      res.json() as unknown as {data: {error?: ImgurException; link?: string}}
+    )
 
-    const { data: { error, link } } = JSON.parse(body.toString())
+    const {
+      data: { error, link }
+    } = body
+
     if (error) {
-      /* eslint-disable */
-      console.log('error :', error)
-      throw Error(error)
+      throw new ImgurError(error)
+    } else if (!link) {
+      throw Error('No Link')
     }
+
     return link
   }
 
@@ -86,13 +119,13 @@ export class TaggerClient extends DataClient {
   public async searchSuggestions (id: string): Promise<Array<DatabaseObject>> {
     const tags = await this.getTags()
 
-    return tags.filter((tag) => tag.get('id').includes(id))
+    return tags.filter((tag) => (<string>tag.get('id')).includes(id))
   }
 
   public async incrementTagCount (id: string): Promise<number | void> {
     const tag = await this.getTag(id)
     if (tag) {
-      const count = tag.get('count') + 1
+      const count = <number>tag.get('count') + 1
       await this.upsertTag(id, { count })
       return count
     }

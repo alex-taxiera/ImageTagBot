@@ -1,5 +1,6 @@
 import { CommandResults } from 'eris-boiler'
 import { Command } from '@tagger'
+import { ImgurError } from '@tagger/exceptions'
 
 export default new Command({
   name: 'add',
@@ -24,7 +25,20 @@ export default new Command({
         return `Tag \`${id}\` already exists`
       }
 
-      const newSrc = await bot.uploadToImgur(src)
+      let newSrc: string | undefined
+      try {
+        await msg.channel.sendTyping()
+        newSrc = await bot.uploadToImgur(src)
+      } catch (e) {
+        if (e instanceof ImgurError) {
+          switch (e.code) {
+            case 1003: return 'Bad URL!'
+            default: return 'Unknown error!'
+          }
+        } else {
+          throw e
+        }
+      }
       await bot.upsertTag(id, { user: msg.author.id, src: newSrc })
       return `Added \`${id}\``
     })

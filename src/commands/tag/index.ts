@@ -2,8 +2,8 @@ import {
   CommandResults
 } from 'eris-boiler'
 import * as logger from 'eris-boiler/util/logger'
+import fetch from 'node-fetch'
 
-import request from '@http'
 import {
   Command
 } from '@tagger'
@@ -29,13 +29,13 @@ export default new Command({
       if (!tag) {
         return `Tag \`${query}\` doesn't exists`
       }
-      const src = tag.get('src')
-      const { body } = await request(src)
-      const ext = src.toLowerCase().match(bot.IMAGE_REGEXP).pop()
+      const src = tag.get('src') as string
+      const res = await fetch(src)
+      const ext = bot.IMAGE_REGEXP.exec(src.toLowerCase())?.pop() ?? ''
       bot.incrementTagCount(query)
         .catch((error) => logger.error('failed to count', error))
 
-      return { file: { file: body, name: `${query}.${ext}` } }
+      return { file: { file: await res.buffer(), name: `${query}.${ext}` } }
     })
   }
 })

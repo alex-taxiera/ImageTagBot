@@ -14,7 +14,13 @@ export default new Command({
         embed: {
           title: `${msg.author.username}'s Tags`,
           description: tags
-            .map((dbo) => `${dbo.get('id')} (${dbo.get('count')})`)
+            .map(
+              (dbo) => `${
+                <string>dbo.get('id')
+              } (${
+                <string>dbo.get('count')
+              })`
+            )
             .join('\n')
         }
       }

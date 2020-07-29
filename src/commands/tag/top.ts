@@ -16,7 +16,9 @@ export default new Command({
           description: tags
             .sort((a, b) => b.get('count') - a.get('count'))
             .slice(0, 10)
-            .map((dbo) => `${dbo.get('id')} (${dbo.get('count')})`)
+            .map(
+              (dbo) => `${<string>dbo.get('id')} (${<string>dbo.get('count')})`
+            )
             .join('\n')
         }
       }
