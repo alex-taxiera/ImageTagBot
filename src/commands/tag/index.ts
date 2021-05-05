@@ -23,7 +23,7 @@ export default new Command({
     parameters: [ 'query' ],
     subCommands: [ add, remove, update, list, search, info, top ]
   },
-  run: (bot, { params }): CommandResults => {
+  run: (bot, { params }) => {
     const query = params.join(' ')
     return bot.getTag(query).then(async (tag) => {
       if (!tag) {

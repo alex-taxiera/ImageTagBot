@@ -1,10 +1,9 @@
-import { CommandResults } from 'eris-boiler'
 import { Command } from '@tagger'
 
 export default new Command({
   name: 'list',
   description: 'List your tags',
-  run: function (bot, { msg }): CommandResults {
+  run: function (bot, { msg }) {
     return bot.getTagsForUser(msg.author.id).then((tags) => {
       if (!tags.length) {
         return 'No tags found for you.'

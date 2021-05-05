@@ -1,10 +1,9 @@
-import { CommandResults } from 'eris-boiler'
 import { Command } from '@tagger'
 
 export default new Command({
   name: 'top',
   description: 'top 10 tags', // TODO: add sub commands for guild/user top 10 ("help top" for filters)
-  run: (bot): CommandResults => {
+  run: function (bot) {
     return bot.getTags().then((tags) => {
       if (!tags.length) {
         return 'No tags found.'

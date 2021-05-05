@@ -11,10 +11,15 @@ import {
   DatabaseObject
 } from 'eris-boiler'
 import FormData from 'form-data'
+import { fromBuffer } from 'file-type'
 import fetch from 'node-fetch'
 
 import { ImgurError, ImgurException } from './exceptions'
 import { streamFromBuffer } from '@file'
+
+export const validTypes = [ 'image', 'video' ] as const
+
+export class UploadValidationError extends Error {}
 
 export type TagDatabaseConfig = {
   connection: ConnectionData
@@ -40,15 +45,24 @@ export class TaggerClient extends DataClient {
 
   public async uploadToImgur (
     src: string,
-    type: 'image' | 'video' = 'image',
+    type: typeof validTypes[number] = 'image',
     title: string = 'Cool Image'
   ): Promise<string> {
     const res = await fetch(src)
     const data = await res.buffer()
+    const metadata = await fromBuffer(data)
+
+    if (
+      !metadata ||
+      validTypes.every((type) => !metadata.mime.startsWith(type))
+    ) {
+      throw new UploadValidationError('Not an image or video!')
+    }
+
     const size = Buffer.byteLength(data)
 
     if (size > 1024 * 1024 * (type === 'image' ? 10 : 200)) {
-      throw Error('File is too big!')
+      throw new UploadValidationError('File is too big!')
     }
 
     const stream = streamFromBuffer(data)

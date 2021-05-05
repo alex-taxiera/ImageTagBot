@@ -1,5 +1,4 @@
 import {
-  CommandResults,
   DatabaseObject
 } from 'eris-boiler'
 import {
@@ -15,7 +14,7 @@ export default new Command({
     parameters: [ 'tag id (can have multiple, separate by spaces)' ],
     permission: ownTag
   },
-  run: function (bot, { params }): CommandResults {
+  run: function (bot, { params }) {
     if (params.length < 1) {
       return 'Missing id!'
     }

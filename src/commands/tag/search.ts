@@ -1,4 +1,3 @@
-import { CommandResults } from 'eris-boiler'
 import { Command } from '@tagger'
 
 export default new Command({
@@ -8,7 +7,7 @@ export default new Command({
     aliases: [ 'find' ],
     parameters: [ 'query' ]
   },
-  run: function (bot, { params }): CommandResults {
+  run: function (bot, { params }) {
     const query = params[0]
     if (!query) {
       return 'No query!'

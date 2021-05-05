@@ -1,5 +1,3 @@
-import { CommandResults } from 'eris-boiler'
-
 import { Command } from '@tagger'
 import ownTag from '@tagger/permissions/own-tag'
 
@@ -11,7 +9,7 @@ export default new Command({
     parameters: [ 'tag id' ],
     permission: ownTag
   },
-  run: function (bot, { msg, params }): CommandResults {
+  run: function (bot, { msg, params }) {
     const [ id, url ] = params
     const src = msg.attachments.length > 0 ? msg.attachments[0].url : url
 

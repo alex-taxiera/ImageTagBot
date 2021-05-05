@@ -1,6 +1,6 @@
-import { CommandResults } from 'eris-boiler'
-import { Command } from '@tagger'
+import { Command, UploadValidationError } from '@tagger'
 import { ImgurError } from '@tagger/exceptions'
+import { logger } from 'eris-boiler/util'
 
 export default new Command({
   name: 'add',
@@ -9,7 +9,7 @@ export default new Command({
     aliases: [ 'create' ],
     parameters: [ 'tag id' ]
   },
-  run: function (bot, { msg, params }): CommandResults {
+  run: function (bot, { msg, params }) {
     const [ id, url ] = params
     const src = msg.attachments.length > 0 ? msg.attachments[0].url : url
 
@@ -33,8 +33,12 @@ export default new Command({
         if (e instanceof ImgurError) {
           switch (e.code) {
             case 1003: return 'Bad URL!'
-            default: return 'Unknown error!'
+            default:
+              logger.error('imgur error :>> ', e)
+              return 'Unknown error!'
           }
+        } else if (e instanceof UploadValidationError) {
+          return e.message
         } else {
           throw e
         }

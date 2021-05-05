@@ -1,4 +1,3 @@
-import { CommandResults } from 'eris-boiler'
 import { Command } from '@tagger'
 
 export default new Command({
@@ -8,7 +7,7 @@ export default new Command({
     aliases: [ 'about' ],
     parameters: [ 'tag id' ]
   },
-  run: function (bot, { params }): CommandResults {
+  run: function (bot, { params }) {
     const id = params[0]
     if (!id) {
       return 'Missing id!'

@@ -14,39 +14,43 @@ import {
   oratorOptions,
   statusManagerOptions
 } from './config'
+import { logger } from 'eris-boiler/util'
 
-if (process.env.NODE_ENV === 'production') {
-  require('docker-secret-env').load()
-} else {
-  require('dotenv').config()
-}
+main().catch(() => undefined)
 
-const {
-  DISCORD_TOKEN,
-  IMGUR_CLIENT_ID,
-  DB_CLIENT,
-  DB_NAME,
-  DB_USER,
-  DB_PASS,
-  DB_HOST
-} = (process.env as unknown) as ENV
+async function main () {
+  if (process.env.NODE_ENV === 'production') {
+    await import('docker-secret-env').then(({ load }) => load())
+  } else {
+    await import('dotenv').then(({ config }) => config())
+  }
 
-const bot = new TaggerClient(DISCORD_TOKEN, IMGUR_CLIENT_ID, {
-  oratorOptions,
-  statusManagerOptions,
-  databaseManager: new SQLManager({
-    connectionInfo: {
-      database: DB_NAME,
-      user: DB_USER,
-      password: DB_PASS,
-      host: DB_HOST
-    },
-    client: DB_CLIENT
+  const {
+    DISCORD_TOKEN,
+    IMGUR_CLIENT_ID,
+    DB_CLIENT,
+    DB_NAME,
+    DB_USER,
+    DB_PASS,
+    DB_HOST
+  } = (process.env as unknown) as ENV
+
+  const bot = new TaggerClient(DISCORD_TOKEN, IMGUR_CLIENT_ID, {
+    oratorOptions,
+    statusManagerOptions,
+    databaseManager: new SQLManager({
+      connectionInfo: {
+        database: DB_NAME,
+        user: DB_USER,
+        password: DB_PASS,
+        host: DB_HOST
+      },
+      client: DB_CLIENT
+    })
   })
-})
 
-bot
-  .addCommands(join(__dirname, 'commands'))
-  .connect()
-  // eslint-disable-next-line no-console
-  .catch(console.error)
+  bot
+    .addCommands(join(__dirname, 'commands'))
+    .connect()
+    .catch(logger.error)
+}
