@@ -4,11 +4,14 @@ import {
   StatusManagerOptions,
   CommandContext,
   Command as BaseCommand,
+  CommandData as BaseCommandData,
+  CommandOptions as BaseCommandOptions,
   Permission as BasePermission,
   ConnectionData,
   DatabaseManagerOptions,
   DataClientOptions,
-  DatabaseObject
+  DatabaseObject,
+  MiddlewareRun
 } from 'eris-boiler'
 import FormData from 'form-data'
 import { fromBuffer } from 'file-type'
@@ -146,10 +149,49 @@ export class TaggerClient extends DataClient {
   }
 }
 
+export interface CommandOptions<
+  T extends DataClient = TaggerClient,
+  C extends CommandContext = CommandContext
+> extends BaseCommandOptions<T, C> {
+  middleware?: CommandMiddleware[]
+}
+
+export interface CommandData<
+  T extends DataClient = TaggerClient,
+  C extends CommandContext = CommandContext
+> extends BaseCommandData<T, C> {
+  options?: CommandOptions<T, C>
+}
+
 export class Command<
   C extends CommandContext = CommandContext,
   T extends DataClient = TaggerClient
-> extends BaseCommand<T, C> {}
+> extends BaseCommand<T, C> {
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
+  constructor (data: CommandData<T, C>) {
+    super(data)
+  }
+}
+
+export class CommandMiddleware<
+  T extends DataClient = TaggerClient,
+  C extends CommandContext = CommandContext
+> {
+  public run?: MiddlewareRun<T, C>
+  public failMessage?: string
+  constructor (data: CommandMiddlewareData<T, C>) {
+    this.run = data.run
+    this.failMessage = data.failMessage
+  }
+}
+
+export type CommandMiddlewareData<
+  T extends DataClient,
+  C extends CommandContext
+> = {
+  failMessage?: string
+  run?: MiddlewareRun<T, C>
+}
 export class Permission<
   T extends DataClient = TaggerClient
 > extends BasePermission<T> {}
