@@ -4,9 +4,10 @@ interface CooldownEntry {
 }
 
 export class CooldownHandler {
+
   constructor (
     private readonly time = 60_000 * 5,
-    private readonly amount = 5
+    private readonly amount = 5,
   ) {}
 
   private readonly entries: CooldownEntry[] = []
@@ -14,7 +15,7 @@ export class CooldownHandler {
   public addEntry (userId: string): void {
     this.entries.push({
       userId,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     })
   }
 
@@ -40,4 +41,5 @@ export class CooldownHandler {
 
     return this.time - (now - oldestEntry.timestamp)
   }
+
 }

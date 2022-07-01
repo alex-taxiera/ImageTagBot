@@ -1,197 +1,146 @@
-import {
-  DataClient,
-  OratorOptions,
-  StatusManagerOptions,
-  CommandContext,
-  Command as BaseCommand,
-  CommandData as BaseCommandData,
-  CommandOptions as BaseCommandOptions,
-  Permission as BasePermission,
-  ConnectionData,
-  DatabaseManagerOptions,
-  DataClientOptions,
-  DatabaseObject,
-  MiddlewareRun
-} from 'eris-boiler'
 import FormData from 'form-data'
 import { fromBuffer } from 'file-type'
 import fetch from 'node-fetch'
+import config from 'config'
 
-import { ImgurError, ImgurException } from './exceptions'
+import {
+  ImgurError,
+  ImgurException,
+} from './exceptions'
 import { streamFromBuffer } from '@file'
+
+import { prisma } from '@utils/db'
+import { Tag } from '@prisma/client'
 
 export const validTypes = [ 'image', 'video' ] as const
 
 export class UploadValidationError extends Error {}
 
-export type TagDatabaseConfig = {
-  connection: ConnectionData
-  options?: DatabaseManagerOptions
-}
-export type TaggerClientOptions = {
-  oratorOptions?: OratorOptions
-  statusManagerOptions?: StatusManagerOptions
-}
-export class TaggerClient extends DataClient {
-  private readonly API_URL = 'https://api.imgur.com/3'
-  private readonly imgurClientId: string
-  public readonly IMAGE_REGEXP = /^(?:https|http):?\/.*\.(\w+)/
+const API_URL = 'https://api.imgur.com/3'
 
-  constructor (
-    token: string,
-    imgurClientId: string,
-    options?: DataClientOptions
+const imgurClientId: string = config.get('IMGUR_CLIENT_ID')
+
+export const IMAGE_REGEXP = /^(?:https|http):?\/.*\.(\w+)/
+
+export async function uploadToImgur (
+  src: string,
+  type: typeof validTypes[number] = 'image',
+  title: string = 'Cool Image',
+): Promise<string> {
+  const res = await fetch(src)
+  const data = await res.buffer()
+  const metadata = await fromBuffer(data)
+
+  if (
+    !metadata ||
+    validTypes.every((type) => !metadata.mime.startsWith(type))
   ) {
-    super(token, options)
-    this.imgurClientId = imgurClientId
+    throw new UploadValidationError('Not an image or video!')
   }
 
-  public async uploadToImgur (
-    src: string,
-    type: typeof validTypes[number] = 'image',
-    title: string = 'Cool Image'
-  ): Promise<string> {
-    const res = await fetch(src)
-    const data = await res.buffer()
-    const metadata = await fromBuffer(data)
+  const size = Buffer.byteLength(data)
 
-    if (
-      !metadata ||
-      validTypes.every((type) => !metadata.mime.startsWith(type))
-    ) {
-      throw new UploadValidationError('Not an image or video!')
-    }
+  if (size > 1024 * 1024 * (type === 'image' ? 10 : 200)) {
+    throw new UploadValidationError('File is too big!')
+  }
 
-    const size = Buffer.byteLength(data)
+  const stream = streamFromBuffer(data)
+  const form = new FormData()
+  form.append('title', title)
+  form.append(type, stream, {
+    filename: 'test.gif',
+    contentType: res.headers.get('content-type') ?? undefined,
+    knownLength: size,
+  })
+  form.append('type', 'file')
 
-    if (size > 1024 * 1024 * (type === 'image' ? 10 : 200)) {
-      throw new UploadValidationError('File is too big!')
-    }
+  const body = await fetch(`${API_URL}/upload`, {
+    method: 'POST',
+    headers: {
+      ...form.getHeaders(),
+      Authorization: `Client-ID ${imgurClientId}`,
+    },
+    body: form,
+  }).then(async (res) =>
+    await res.json() as { data: { error?: ImgurException, link?: string } },
+  )
 
-    const stream = streamFromBuffer(data)
-    const form = new FormData()
-    form.append('title', title)
-    form.append(type, stream, {
-      filename: 'test.gif',
-      contentType: res.headers.get('content-type') ?? undefined,
-      knownLength: size
-    })
-    form.append('type', 'file')
+  const {
+    data: { error, link },
+  } = body
 
-    const body = await fetch(`${this.API_URL}/upload`, {
-      method: 'POST',
-      headers: {
-        ...form.getHeaders(),
-        Authorization: `Client-ID ${this.imgurClientId}`
+  if (error) {
+    throw new ImgurError(error)
+  } else if (link == null) {
+    throw Error('No Link')
+  }
+
+  return link
+}
+
+export async function upsertTag (
+  data: Pick<Tag, 'id'> & Partial<Omit<Tag, 'id'>>,
+): Promise<Tag> {
+  const exists = await prisma.tag.findUnique({
+    where: { id: data.id },
+  })
+
+  if (exists) {
+    return await prisma.tag.update({
+      where: { id: data.id },
+      data: {
+        ...data,
       },
-      body: form
-    }).then((res) =>
-      res.json() as unknown as {data: {error?: ImgurException; link?: string}}
-    )
-
-    const {
-      data: { error, link }
-    } = body
-
-    if (error) {
-      throw new ImgurError(error)
-    } else if (!link) {
-      throw Error('No Link')
-    }
-
-    return link
+    })
   }
 
-  public async upsertTag (
-    id: string,
-    data: { id?: string; src?: string; user?: string; count?: number }
-  ): Promise<DatabaseObject> {
-    const tag = await this.getTag(id)
-    if (tag) {
-      return tag.save(data)
-    }
+  const {
+    id,
+    user,
+    src,
+    count,
+  } = data
 
-    return this.dbm.newObject('tag', { id, ...data }).save()
+  if (id == null || user == null || src == null) {
+    throw new Error('Could not create tag: Missing data')
   }
 
-  public async removeTag (id: string): Promise<void> {
-    const tag = await this.getTag(id)
-    if (tag) {
-      return tag.delete()
-    }
-  }
-
-  public getTag (id: string): Promise<DatabaseObject | void> {
-    return this.dbm.newQuery('tag').get(id, 'id')
-  }
-
-  public getTags (): Promise<Array<DatabaseObject>> {
-    return this.dbm.newQuery('tag').find()
-  }
-
-  public getTagsForUser (user: string): Promise<Array<DatabaseObject>> {
-    return this.dbm.newQuery('tag').equalTo('user', user).find()
-  }
-
-  public async searchSuggestions (id: string): Promise<Array<DatabaseObject>> {
-    const tags = await this.getTags()
-
-    return tags.filter((tag) => (<string>tag.get('id')).includes(id))
-  }
-
-  public async incrementTagCount (id: string): Promise<number | void> {
-    const tag = await this.getTag(id)
-    if (tag) {
-      const count = <number>tag.get('count') + 1
-      await this.upsertTag(id, { count })
-      return count
-    }
-  }
+  return await prisma.tag.create({
+    data: {
+      id, user, src, count,
+    },
+  })
 }
 
-export interface CommandOptions<
-  T extends DataClient = TaggerClient,
-  C extends CommandContext = CommandContext
-> extends BaseCommandOptions<T, C> {
-  middleware?: CommandMiddleware[]
+export async function removeTag (id: string): Promise<void> {
+  await prisma.tag.delete({ where: { id } })
 }
 
-export interface CommandData<
-  T extends DataClient = TaggerClient,
-  C extends CommandContext = CommandContext
-> extends BaseCommandData<T, C> {
-  options?: CommandOptions<T, C>
+export async function getTag (id: string): Promise<Tag | null> {
+  return await prisma.tag.findUnique({ where: { id } })
 }
 
-export class Command<
-  C extends CommandContext = CommandContext,
-  T extends DataClient = TaggerClient
-> extends BaseCommand<T, C> {
-  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
-  constructor (data: CommandData<T, C>) {
-    super(data)
+export async function getTags (): Promise<Tag[]> {
+  return await prisma.tag.findMany()
+}
+
+export async function getTagsForUser (user: string): Promise<Tag[]> {
+  return await prisma.tag.findMany({ where: { user } })
+}
+
+export async function searchSuggestions (id: string): Promise<Tag[]> {
+  const tags = await getTags()
+
+  return tags.filter((tag) => tag.id.includes(id))
+}
+
+export async function incrementTagCount (
+  id: string,
+): Promise<number | undefined> {
+  const tag = await getTag(id)
+  if (tag) {
+    const count = tag.count + 1
+    await upsertTag({ id, count })
+    return count
   }
 }
-
-export class CommandMiddleware<
-  T extends DataClient = TaggerClient,
-  C extends CommandContext = CommandContext
-> {
-  public run?: MiddlewareRun<T, C>
-  public failMessage?: string
-  constructor (data: CommandMiddlewareData<T, C>) {
-    this.run = data.run
-    this.failMessage = data.failMessage
-  }
-}
-
-export type CommandMiddlewareData<
-  T extends DataClient,
-  C extends CommandContext
-> = {
-  failMessage?: string
-  run?: MiddlewareRun<T, C>
-}
-export class Permission<
-  T extends DataClient = TaggerClient
-> extends BasePermission<T> {}

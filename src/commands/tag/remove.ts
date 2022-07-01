@@ -1,10 +1,6 @@
-import {
-  DatabaseObject
-} from 'eris-boiler'
-import {
-  Command
-} from '@tagger'
-import ownTag from '@tagger/permissions/own-tag'
+import { DatabaseObject } from 'eris-boiler'
+import { Command } from '@tagger'
+import ownTag from '@permissions/own-tag'
 
 export default new Command({
   name: 'remove',
@@ -12,7 +8,7 @@ export default new Command({
   options: {
     aliases: [ 'delete', 'del', 'rm' ],
     parameters: [ 'tag id (can have multiple, separate by spaces)' ],
-    permission: ownTag
+    permission: ownTag,
   },
   run: function (bot, { params }) {
     if (params.length < 1) {
@@ -21,7 +17,7 @@ export default new Command({
 
     return Promise.all(params.map((id) => bot.getTag(id)))
       .then(async (dbos) => {
-        const tags: Array<DatabaseObject> = []
+        const tags: DatabaseObject[] = []
 
         for (const tag of dbos) {
           if (!tag) {
@@ -35,5 +31,5 @@ export default new Command({
 
         return 'Deleted!'
       })
-  }
+  },
 })

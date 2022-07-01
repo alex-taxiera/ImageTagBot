@@ -1,18 +1,19 @@
-import { CommandMiddleware } from '@tagger'
+import { CommandMiddleware } from '@hephaestus/eris'
 import { CooldownHandler } from './CooldownHandler'
 
 export const cooldownMiddlewareFactory = (
-  cooldownHandler: CooldownHandler
-): CommandMiddleware => new CommandMiddleware({
-  failMessage: 'Try again later!',
-  run: (_, context) => {
+  cooldownHandler: CooldownHandler,
+): CommandMiddleware => ({
+  // failMessage: 'Try again later!',
+  action: async (interaction) => {
+    const msg = await interaction.getOriginalMessage()
     const cooldownTime = cooldownHandler
-      .getCoolDownTime(context.msg.author.id)
+      .getCoolDownTime(msg.author.id)
 
-    if (cooldownTime) {
+    if (cooldownTime != null) {
       throw Error(`Try again in ${(cooldownTime / 1000).toFixed(0)}s`)
     }
 
-    cooldownHandler.addEntry(context.msg.author.id)
-  }
+    cooldownHandler.addEntry(msg.author.id)
+  },
 })

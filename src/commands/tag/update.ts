@@ -1,5 +1,5 @@
 import { Command } from '@tagger'
-import ownTag from '@tagger/permissions/own-tag'
+import ownTag from '@permissions/own-tag'
 
 export default new Command({
   name: 'update',
@@ -7,7 +7,7 @@ export default new Command({
   options: {
     aliases: [ 'edit' ],
     parameters: [ 'tag id' ],
-    permission: ownTag
+    permission: ownTag,
   },
   run: function (bot, { msg, params }) {
     const [ id, url ] = params
@@ -32,5 +32,5 @@ export default new Command({
       await bot.upsertTag(id, { src: newTag })
       return `Updated \`${id}\``
     })
-  }
+  },
 })

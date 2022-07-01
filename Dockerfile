@@ -1,9 +1,10 @@
-FROM node:12-alpine
+FROM node:16-alpine
 
-RUN apk add --no-cache git; mkdir -p /tagger
+RUN mkdir -p /tagger
 WORKDIR /tagger
 
+COPY package.json package-lock.json ./
+RUN npm ci --no-optional --only=prod --ignore-scripts
 COPY . .
-RUN npm ci --only=prod --no-optional
 
 CMD ["npm", "start"]
