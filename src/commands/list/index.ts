@@ -4,7 +4,6 @@ import { top } from './top'
 
 const command: TopLevelCommand = {
   type: 1,
-  guildId: '436591833196265473',
   name: 'list',
   description: 'List tags.',
   options: [ mine, top ],

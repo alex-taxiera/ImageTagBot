@@ -11,7 +11,6 @@ import { update } from './update'
 
 const command: TopLevelCommand = {
   type: 1,
-  guildId: '436591833196265473',
   name: 'tag',
   description: 'Finds, Adds, Remove, or Edit tags',
   middleware: [
