@@ -1,31 +1,27 @@
-FROM node:lts-buster-slim AS base
-RUN apt-get update && apt-get install libssl-dev ca-certificates -y
+FROM node:16 AS build
 
-RUN mkdir -p /tagger
-WORKDIR /tagger
+WORKDIR /app
 
 COPY package.json package-lock.json ./
+RUN npm install
 
-FROM base as build
-RUN export NODE_ENV=production
-RUN npm i
-
-COPY . .
-RUN npx prisma generate
-
-FROM base as prod-build
-
-RUN npm ci --no-optional --only=prod --ignore-scripts
 COPY prisma prisma
 RUN npx prisma generate
-RUN cp -R node_modules prod_node_modules
 
-FROM base as prod
+COPY config config
+COPY src src
+COPY ./tsconfig.json ./tsconfig.json
+RUN npm run build
 
-COPY --from=prod-build /tagger/prod_node_modules /tagger/node_modules
-COPY --from=build  /tagger/prisma /tagger/prisma
-COPY --from=build  /tagger/src /tagger/src
-COPY --from=build  /tagger/config /tagger/config
-COPY --from=build  /tagger/tsconfig.json /tagger/tsconfig.json
 
-CMD ["npm", "start"]
+FROM node:16-alpine
+
+WORKDIR /app
+RUN export NODE_ENV=production
+
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev --ignore-scripts
+
+COPY --from=build /app/dist /app
+
+CMD ["node"]
