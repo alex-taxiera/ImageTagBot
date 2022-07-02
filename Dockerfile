@@ -22,7 +22,7 @@ RUN cp -R node_modules prod_node_modules
 
 FROM base as prod
 
-COPY --from=prod-build /app/prod_node_modules /app/node_modules
-COPY --from=build  /app/prisma /app/prisma
+COPY --from=prod-build /tagger/prod_node_modules /tagger/node_modules
+COPY --from=build  /tagger/prisma /tagger/prisma
 
 CMD ["npm", "start"]
