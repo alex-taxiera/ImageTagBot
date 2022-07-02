@@ -4,7 +4,7 @@ RUN mkdir -p /tagger
 WORKDIR /tagger
 
 COPY package.json package-lock.json ./
-RUN npm ci --no-optional --only=prod --ignore-scripts
+RUN npm ci
 COPY . .
 
 CMD ["npm", "start"]
