@@ -1,0 +1,130 @@
+name: Build and Release
+
+on:
+  push:
+    # push limited to branches we should deploy
+    # possibly add release/* or feature/* or dev/*
+    branches: [master]
+  pull_request: {}
+
+jobs:
+
+  install:
+    name: Install Dependencies
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+        node-version:
+          - 16.x
+    runs-on: ${{ matrix.os }}
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@master
+      -
+        name: Setup Node.JS
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      -
+        name: Dependency Cache
+        id: deps
+        uses: actions/cache@v2
+        with:
+          path: |
+            **/node_modules
+            ~/.npm
+          key: ${{ matrix.os }}_node-v${{ matrix.node-version }}_${{ hashFiles('**/package-lock.json') }}
+      -
+        name: npm ci
+        if: steps.deps.outputs.cache-hit != 'true'
+        run: npm ci
+
+  compile:
+    name: Compile
+    needs: [install]
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+        node-version:
+          - 16.x
+    runs-on: ${{ matrix.os }}
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@master
+      -
+        name: Setup Node.JS
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      -
+        name: Dependency Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            **/node_modules
+            ~/.npm
+          key: ${{ matrix.os }}_node-v${{ matrix.node-version }}_${{ hashFiles('**/package-lock.json') }}
+      -
+        name: Compile Typescript
+        run: npx tsc
+
+  lint:
+    name: Lint
+    needs: [install]
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+        node-version:
+          - 16.x
+    runs-on: ${{ matrix.os }}
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@master
+      -
+        name: Setup Node.JS
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      -
+        name: Dependency Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            **/node_modules
+            ~/.npm
+          key: ${{ matrix.os }}_node-v${{ matrix.node-version }}_${{ hashFiles('**/package-lock.json') }}
+      -
+        name: Lint Repo
+        run: npm run lint
+
+  release:
+    name: Trigger Release
+    needs: [compile, lint]
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'pull_request' }}
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@master
+      -
+        name: Extract Branch Name
+        id: extract_branch
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+      -
+        name: Publish to Registry
+        uses: elgohr/Publish-Docker-Github-Action@master
+        env:
+          RUN_NUMBER: ${{ github.RUN_NUMBER }}
+        with:
+          name: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.REPO }}
+          tags: "${{ secrets.NAME }},${{ secrets.NAME }}-${{ github.RUN_NUMBER }},${{ secrets.NAME }}-${{ steps.extract_branch.outputs.branch }}"
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          buildargs: RUN_NUMBER

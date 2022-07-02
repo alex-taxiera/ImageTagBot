@@ -1,29 +1,36 @@
 {
-  "name": "image-tag-bot",
-  "version": "0.0.0",
-  "description": "An image saving bot built for Discord.",
-  "repository": "https://github.com/alex-taxiera/image-tag-bot.git",
-  "author": "Alex Taxiera",
-  "license": "MIT",
   "scripts": {
-    "dev": "npx nodemon index.js",
-    "start": "node src/index.js"
+    "start": "ts-node -r tsconfig-paths/register ./src/index.ts",
+    "lint": "eslint .",
+    "dev": "ts-node-dev -r tsconfig-paths/register ./src/index.ts",
+    "debug": "node --inspect-brk=0.0.0.0:9229 -r ts-node/register -r tsconfig-paths/register ./src/index.ts",
+    "validate": "npm run lint && tsc --noEmit"
   },
   "dependencies": {
-    "dotenv": "^8.1.0",
-    "eris": "^0.10.1",
-    "eris-boiler": "github:alex-taxiera/eris-boiler",
-    "imgur": "^0.3.1",
-    "mysql": "github:mysqljs/mysql",
-    "pg": "^7.12.1",
-    "superagent": "^5.1.0"
+    "@hephaestus/eris": "1.0.0-alpha.8",
+    "@prisma/client": "^4.0.0",
+    "@types/dotenv": "^8.2.0",
+    "@types/node": "~16.11.42",
+    "@types/node-fetch": "^2.6.2",
+    "@types/readable-stream": "^2.3.13",
+    "config": "^3.3.7",
+    "docker-secret-env": "^0.2.1",
+    "file-type": "^16.5.3",
+    "form-data": "^4.0.0",
+    "node-fetch": "2.6.7",
+    "pg": "^8.7.3",
+    "ts-node": "^10.8.1",
+    "tsconfig-paths": "^4.0.0",
+    "typescript": "^4.7.4"
   },
   "devDependencies": {
-    "eslint": "^6.5.1",
-    "eslint-config-standard": "^14.1.0",
-    "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-node": "^10.0.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.1"
+    "@alex-taxiera/eslint-config-ts": "^2.0.1",
+    "@types/config": "^0.0.41",
+    "@types/ws": "^8.5.3",
+    "@typescript-eslint/parser": "^4.33.0",
+    "dotenv": "^16.0.1",
+    "eslint": "^7.32.0",
+    "prisma": "^4.0.0",
+    "ts-node-dev": "2.0.0"
   }
 }
