@@ -4,7 +4,8 @@ RUN mkdir -p /tagger
 WORKDIR /tagger
 
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --no-optional --only=prod --ignore-scripts
+RUN npx prisma generate
 COPY . .
 
 CMD ["npm", "start"]
