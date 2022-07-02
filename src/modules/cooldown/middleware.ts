@@ -5,15 +5,16 @@ export const cooldownMiddlewareFactory = (
   cooldownHandler: CooldownHandler,
 ): CommandMiddleware => ({
   // failMessage: 'Try again later!',
-  action: async (interaction) => {
-    const msg = await interaction.getOriginalMessage()
+  action: (interaction) => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const user = interaction.member?.user ?? interaction.user!
     const cooldownTime = cooldownHandler
-      .getCoolDownTime(msg.author.id)
+      .getCoolDownTime(user.id)
 
     if (cooldownTime != null) {
       throw Error(`Try again in ${(cooldownTime / 1000).toFixed(0)}s`)
     }
 
-    cooldownHandler.addEntry(msg.author.id)
+    cooldownHandler.addEntry(user.id)
   },
 })

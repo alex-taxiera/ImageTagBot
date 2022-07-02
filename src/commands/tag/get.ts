@@ -1,20 +1,28 @@
+import fetch from 'node-fetch'
+
 import { SubCommand } from '@hephaestus/eris'
 
+import { cooldownMiddlewareFactory } from '@cooldown/middleware'
+import { CooldownHandler } from '@cooldown/CooldownHandler'
 import {
   getTag,
   IMAGE_REGEXP,
+  incrementTagCount,
   autocompleteSuggestions,
 } from '@tagger'
 
-export const info: SubCommand = {
+export const get: SubCommand = {
   type: 1,
-  name: 'info',
-  description: 'Get info on a tag.',
+  name: 'get',
+  description: 'Finds, Adds, Remove, or Edit tags',
+  middleware: [
+    cooldownMiddlewareFactory(new CooldownHandler()),
+  ],
   options: [
     {
       type: 3,
       name: 'name',
-      description: 'The tag to get info on',
+      description: 'The tag to get',
       required: true,
       autocomplete: true,
       autocompleteAction: async (interaction) => {
@@ -40,9 +48,9 @@ export const info: SubCommand = {
       },
     },
   ],
-  action: async (interaction, client) => {
+  action: async (interaction) => {
     const subCommand = interaction.data.options
-      ?.find((option) => option.name === 'info')
+      ?.find((option) => option.name === 'get')
 
     if (subCommand?.type !== 1) {
       await interaction.createMessage('bork!')
@@ -68,34 +76,15 @@ export const info: SubCommand = {
       return
     }
 
-    const user = await client.getRESTUser(tag.user)
+    const res = await fetch(tag.src)
+    const ext = IMAGE_REGEXP.exec(tag.src.toLowerCase())?.pop() ?? ''
+    incrementTagCount(tag.id)
+      // eslint-disable-next-line no-console
+      .catch((error) => console.error('failed to count', error))
 
-    await interaction.createMessage({
-      embeds: [
-        {
-          author: {
-            name: `${user?.username ?? 'ERR'}#${user?.discriminator ?? 'ERR'}`,
-            icon_url: user?.avatarURL,
-          },
-          thumbnail: {
-            url: IMAGE_REGEXP.test(tag.src) ? tag.src : '',
-          },
-          fields: [
-            {
-              name: 'Tag Name',
-              value: tag.id,
-            },
-            {
-              name: 'Tag Source',
-              value: tag.src,
-            },
-            {
-              name: 'Use Count',
-              value: tag.count.toString(),
-            },
-          ],
-        },
-      ],
+    await interaction.createMessage('', {
+      file: await res.buffer(),
+      name: `${option.value}.${ext}`,
     })
   },
 }

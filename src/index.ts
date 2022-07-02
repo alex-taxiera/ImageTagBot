@@ -1,24 +1,14 @@
+import {
+  Client,
+  BotActivityType,
+} from 'eris'
 import { Forge } from '@hephaestus/eris'
 import config from 'config'
-
-// import { prisma } from '@utils/db'
+import { join } from 'path'
+import { Status } from '@prisma/client'
+import { prisma } from '@utils/db'
 
 main().catch(() => undefined)// .finally(async () => await prisma.$disconnect())
-
-// const exampleCommand: TopLevelCommand = {
-//   type: 1,
-//   guildId: '436591833196265473',
-//   name: 'example',
-//   description: 'example description',
-//   action: (interaction, client) => {
-//     void interaction.createMessage('example message')
-//   },
-// }
-
-// const readyEvent: Event = {
-//   name: 'ready',
-//   handler: () => console.log('ready'),
-// }
 
 async function main (): Promise<void> {
   if (config.get('NODE_ENV') === 'production') {
@@ -29,8 +19,41 @@ async function main (): Promise<void> {
 
   const client = new Forge(config.get('DISCORD_TOKEN'))
 
-  // client.commands.add(join(__dirname, 'commands'))
-  // client.events.add([ readyEvent ])
-  // client.commands.add([ exampleCommand ])
-  client.connect().catch(console.error)
+  client.commands.add(join(__dirname, 'commands'))
+  // eslint-disable-next-line no-console
+  await client.connect().catch(console.error)
+  void manageStatus(client.client)
+}
+
+async function manageStatus (client: Client): Promise<void> {
+  let current: Status | undefined
+
+  enum STATUS_TYPES {
+    Playing = 0,
+    Streaming,
+    Listening,
+    Watching,
+    Competing = 5,
+  }
+
+  const update = async (): Promise<void> => {
+    const nextStatus = await prisma.status.findFirst({
+      where: {
+        name: { not: current?.name },
+      },
+    })
+    if (nextStatus) {
+      current = nextStatus
+      // eslint-disable-next-line no-console
+      console.log(`${STATUS_TYPES[nextStatus.type] ?? ''} ${nextStatus.name}`)
+      client.editStatus({
+        ...nextStatus,
+        type: nextStatus.type as BotActivityType,
+      })
+    }
+  }
+
+  await update()
+
+  setInterval(update, 1000 * 60 * 12)
 }

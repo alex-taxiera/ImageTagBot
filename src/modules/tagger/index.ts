@@ -112,26 +112,22 @@ export async function upsertTag (
   })
 }
 
-export async function removeTag (id: string): Promise<void> {
-  await prisma.tag.delete({ where: { id } })
-}
-
 export async function getTag (id: string): Promise<Tag | null> {
   return await prisma.tag.findUnique({ where: { id } })
-}
-
-export async function getTags (): Promise<Tag[]> {
-  return await prisma.tag.findMany()
 }
 
 export async function getTagsForUser (user: string): Promise<Tag[]> {
   return await prisma.tag.findMany({ where: { user } })
 }
 
-export async function searchSuggestions (id: string): Promise<Tag[]> {
-  const tags = await getTags()
-
-  return tags.filter((tag) => tag.id.includes(id))
+export async function autocompleteSuggestions (
+  id: string,
+  userId?: string,
+): Promise<Tag[]> {
+  return await prisma.tag.findMany({
+    where: { id: { contains: id }, user: userId },
+    take: 25, // limited for discord autocomplete
+  })
 }
 
 export async function incrementTagCount (

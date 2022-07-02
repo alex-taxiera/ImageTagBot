@@ -13,30 +13,52 @@ export const add: SubCommand = {
   description: 'Add a tag',
   options: [
     {
-      type: 3, name: 'id', description: 'The tag id',
+      type: 3, name: 'id', description: 'The tag id', required: true,
     },
     {
-      type: 3, name: 'url', description: 'The tag url', required: false,
+      type: 3, name: 'url', description: 'The tag url', required: true,
     },
+    // {
+    //   type: 11,
+    //   name: 'attachment',
+    //   description: 'The tag attachment',
+    //   required: false,
+    // },
   ],
   action: async (interaction) => {
-    const idOption = interaction.data.options
+    const subCommand = interaction.data.options
+      ?.find((option) => option.name === 'add')
+
+    if (subCommand?.type !== 1) {
+      await interaction.createMessage('bork!')
+      return
+    }
+
+    const idOption = subCommand.options
       ?.find((option) => option.name === 'id')
+
     if (idOption?.type !== 3) {
-      await interaction.createFollowup('Missing id!')
+      await interaction.createMessage({
+        content: 'Please provide a tag id',
+        flags: 64,
+      })
       return
     }
     const id = idOption.value
-    const urlOption = interaction.data.options
+    const urlOption = subCommand.options
       ?.find((option) => option.name === 'url')
 
-    const msg = await interaction.getOriginalMessage()
-    let url = msg.attachments[0]?.url
+    // const attachmentOption = subCommand.options
+    //   ?.find((option) => option.name === 'attachment')
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    let url // = attachmentOption?.type === 11 ? attachmentOption.value : null
+
     if (url == null) {
       if (urlOption?.type !== 3) {
-        await interaction.createFollowup(
-          'Please attach an image or specify a url!',
-        )
+        await interaction.createMessage({
+          content: 'Please provide a url or attachment',
+          flags: 64,
+        })
         return
       }
       url = urlOption.value
@@ -44,37 +66,54 @@ export const add: SubCommand = {
 
     const tag = await getTag(id)
     if (tag) {
-      await interaction.createFollowup(`Tag \`${id}\` already exists`)
+      await interaction.createMessage({
+        content: `Tag \`${id}\` already exists`,
+        flags: 64,
+      })
       return
     }
 
     let newSrc: string | undefined
     try {
-      await msg.channel.sendTyping()
+      await interaction.defer(64)
       newSrc = await uploadToImgur(url)
     } catch (e) {
       if (e instanceof ImgurError) {
         switch (e.code) {
           case 1003: {
-            await interaction.createFollowup('Bad URL!')
+            await interaction.createMessage({
+              content: 'Tag url is not an image',
+              flags: 64,
+            })
             return
           }
           default: {
-            await interaction.createFollowup('Unknown error!')
+            await interaction.createMessage({
+              content: 'Failed to upload tag',
+              flags: 64,
+            })
             return
           }
         }
       } else if (e instanceof UploadValidationError) {
-        await interaction.createFollowup(e.message)
+        await interaction.createMessage({
+          content: e.message,
+          flags: 64,
+        })
         return
       } else {
         throw e
       }
     }
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const user = interaction.member?.user ?? interaction.user!
     await upsertTag({
-      id, user: msg.author.id, src: newSrc,
+      id, user: user.id, src: newSrc,
     })
 
-    await interaction.createFollowup(`Added \`${id}\``)
+    await interaction.createMessage({
+      content: `Tag \`${id}\` added`,
+      flags: 64,
+    })
   },
 }

@@ -11,12 +11,16 @@ model Guild {
   id     String  @id
   prefix String?
   vip    String?
+
+  @@map("guild")
 }
 
 model Status {
   id   Int    @id @default(autoincrement())
   name String
   type Int    @default(0)
+
+  @@map("status")
 }
 
 model Tag {
@@ -24,4 +28,6 @@ model Tag {
   user  String
   src   String
   count Int    @default(0)
+
+  @@map("tag")
 }

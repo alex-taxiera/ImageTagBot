@@ -18,7 +18,8 @@ export const ownTag: Permission = {
       return false
     }
 
-    const msg = await interaction.getOriginalMessage()
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const user = interaction.member?.user ?? interaction.user!
 
     let tag
     try {
@@ -27,6 +28,6 @@ export const ownTag: Permission = {
       return false
     }
 
-    return msg.author.id === tag?.user
+    return user.id === tag?.user
   },
 }

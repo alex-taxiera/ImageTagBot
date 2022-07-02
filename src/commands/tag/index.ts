@@ -1,44 +1,23 @@
-import fetch from 'node-fetch'
-
 import { TopLevelCommand } from '@hephaestus/eris'
 
-import { add } from './add'
-// import remove from './remove'
-// import update from './update'
-// import list from './list'
-// import search from './search'
-// import info from './info'
-// import top from './top'
 import { cooldownMiddlewareFactory } from '@cooldown/middleware'
 import { CooldownHandler } from '@cooldown/CooldownHandler'
 
+import { add } from './add'
+import { get } from './get'
+import { info } from './info'
+import { remove } from './remove'
+import { update } from './update'
+
 const command: TopLevelCommand = {
   type: 1,
+  guildId: '436591833196265473',
   name: 'tag',
   description: 'Finds, Adds, Remove, or Edit tags',
   middleware: [
     cooldownMiddlewareFactory(new CooldownHandler()),
   ],
-  // options: {
-  //   parameters: [ 'query' ],
-  //   subCommands: [ add, remove, update, list, search, info, top ],
-  //   middleware: [ cooldownMiddlewareFactory(new CooldownHandler()) ],
-  // },
-  action: (interaction, client) => {
-    const query = params.join(' ')
-    return bot.getTag(query).then(async (tag) => {
-      if (!tag) {
-        return `Tag \`${query}\` doesn't exists`
-      }
-      const src = tag.get('src') as string
-      const res = await fetch(src)
-      const ext = bot.IMAGE_REGEXP.exec(src.toLowerCase())?.pop() ?? ''
-      bot.incrementTagCount(query)
-        .catch((error) => logger.error('failed to count', error))
-
-      return { file: { file: await res.buffer(), name: `${query}.${ext}` } }
-    })
-  },
+  options: [ get, add, remove, update, info ],
 }
 
 export default command
