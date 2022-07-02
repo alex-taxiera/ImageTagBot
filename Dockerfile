@@ -24,5 +24,8 @@ FROM base as prod
 
 COPY --from=prod-build /tagger/prod_node_modules /tagger/node_modules
 COPY --from=build  /tagger/prisma /tagger/prisma
+COPY --from=build  /tagger/src /tagger/src
+COPY --from=build  /tagger/config /tagger/config
+COPY --from=build  /tagger/tsconfig.json /tagger/tsconfig.json
 
 CMD ["npm", "start"]
