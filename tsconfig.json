@@ -1,11 +1,17 @@
 {
+  "extends": "ts-node/node16/tsconfig.json",
+  "ts-node": {
+    "esm": true,
+    "compiler": "ttypescript",
+    "experimentalSpecifierResolution":  "node"
+  },
   "compilerOptions": {
-    "target": "es6",
-    "module": "commonjs",
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "node",
     "downlevelIteration": true,
     "outDir": "dist",
     "rootDir": ".",
-    "sourceMap": true,
     "removeComments": true,
     "strict": true,
     "noImplicitReturns": false,

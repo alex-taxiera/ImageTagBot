@@ -4,22 +4,19 @@ import {
 } from 'eris'
 import { Forge } from '@hephaestus/eris'
 import config from 'config'
-import { join } from 'path'
+import {
+  dirname,
+  join,
+} from 'path'
+import { fileURLToPath } from 'url'
 import { Status } from '@prisma/client'
 import { prisma } from '@utils/db'
 
 main().catch(() => undefined)// .finally(async () => await prisma.$disconnect())
 
 async function main (): Promise<void> {
-  if (config.get('NODE_ENV') === 'production') {
-    await import('docker-secret-env').then(({ load }) => load())
-  } else {
-    await import('dotenv').then(({ config }) => config())
-  }
-
   const client = new Forge(config.get('DISCORD_TOKEN'))
-
-  client.commands.add(join(__dirname, 'commands'))
+  client.commands.add(join(dirname(fileURLToPath(import.meta.url)), 'commands'))
   // eslint-disable-next-line no-console
   await client.connect().catch(console.error)
   void manageStatus(client.client)

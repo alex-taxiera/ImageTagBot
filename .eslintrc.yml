@@ -1,12 +1,20 @@
 env:
   es6: true
-parserOptions:
-  ecmaVersion: latest
-  sourceType: module
-  project:
-    - ./tsconfig.json
 ignorePatterns:
   - dist
-extends:
-  - '@alex-taxiera/eslint-config-ts'
-rules: {}
+overrides:
+  -
+    files:
+      - '*.cjs'
+    extends:
+      - '@alex-taxiera/eslint-config-cjs'
+  -
+    files:
+      - '*.ts'
+    parserOptions:
+      ecmaVersion: latest
+      sourceType: module
+      project:
+        - ./tsconfig.json
+    extends:
+      - '@alex-taxiera/eslint-config-ts'

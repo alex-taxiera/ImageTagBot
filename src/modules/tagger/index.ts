@@ -1,5 +1,5 @@
 import FormData from 'form-data'
-import { fromBuffer } from 'file-type'
+import { fileTypeFromBuffer } from 'file-type'
 import fetch from 'node-fetch'
 import config from 'config'
 
@@ -29,7 +29,7 @@ export async function uploadToImgur (
 ): Promise<string> {
   const res = await fetch(src)
   const data = await res.buffer()
-  const metadata = await fromBuffer(data)
+  const metadata = await fileTypeFromBuffer(data)
 
   if (
     !metadata ||

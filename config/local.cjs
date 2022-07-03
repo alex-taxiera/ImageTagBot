@@ -1,8 +1,8 @@
-import * as dotenv from 'dotenv'
+const dotenv = require('dotenv')
 
 dotenv.config()
 
-export default {
+module.exports = {
   ...process.env,
   NODE_ENV: process.env.NODE_ENV ?? 'development',
 }

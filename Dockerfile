@@ -20,8 +20,8 @@ WORKDIR /app
 RUN export NODE_ENV=production
 
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev --ignore-scripts
+RUN npm run install:prod
 
 COPY --from=build /app/dist /app
 
-CMD ["node"]
+CMD ["npm", "run", "start:prod"]
