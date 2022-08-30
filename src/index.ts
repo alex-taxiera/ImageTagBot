@@ -2,7 +2,7 @@ import {
   Client,
   BotActivityType,
 } from 'eris'
-import { Forge } from '@hephaestus/eris'
+import { Hephaestus } from '@hephaestus/eris'
 import config from 'config'
 import {
   dirname,
@@ -10,16 +10,21 @@ import {
 } from 'path'
 import { fileURLToPath } from 'url'
 import { Status } from '@prisma/client'
-import { prisma } from '@utils/db'
+import { prisma } from '@modules/utils/db'
 
 main().catch(() => undefined)// .finally(async () => await prisma.$disconnect())
 
 async function main (): Promise<void> {
-  const client = new Forge(config.get('DISCORD_TOKEN'))
-  client.commands.add(join(dirname(fileURLToPath(import.meta.url)), 'commands'))
+  const hephaestus = new Hephaestus(
+    config.get('DISCORD_TOKEN'),
+    { restMode: true, intents: [] },
+  )
+  hephaestus.commands.forge(
+    join(dirname(fileURLToPath(import.meta.url)), 'commands'),
+  )
   // eslint-disable-next-line no-console
-  await client.connect().catch(console.error)
-  void manageStatus(client.client)
+  await hephaestus.connect().catch(console.error)
+  void manageStatus(hephaestus.client)
 }
 
 async function manageStatus (client: Client): Promise<void> {

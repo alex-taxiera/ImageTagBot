@@ -1,12 +1,13 @@
-import { TopLevelCommand } from '@hephaestus/eris'
+import { createCommand } from '@hephaestus/eris'
 import { mine } from './mine'
 import { top } from './top'
 
-const command: TopLevelCommand = {
+const list = createCommand({
+  guildId: '436591833196265473',
   type: 1,
   name: 'list',
   description: 'List tags.',
   options: [ mine, top ],
-}
+})
 
-export default command
+export default list

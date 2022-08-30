@@ -1,17 +1,18 @@
 import fetch from 'node-fetch'
 
-import { SubCommand } from '@hephaestus/eris'
+import { createCommand } from '@hephaestus/eris'
 
-import { cooldownMiddlewareFactory } from '@cooldown/middleware'
-import { CooldownHandler } from '@cooldown/CooldownHandler'
+import { cooldownMiddlewareFactory } from '@modules/cooldown/middleware'
+import { CooldownHandler } from '@modules/cooldown/CooldownHandler'
 import {
   getTag,
   IMAGE_REGEXP,
   incrementTagCount,
   autocompleteSuggestions,
-} from '@tagger'
+} from '@modules/tagger'
 
-export const get: SubCommand = {
+export const get = createCommand({
+  guildId: '436591833196265473',
   type: 1,
   name: 'get',
   description: 'Finds, Adds, Remove, or Edit tags',
@@ -25,21 +26,7 @@ export const get: SubCommand = {
       description: 'The tag to get',
       required: true,
       autocomplete: true,
-      autocompleteAction: async (interaction) => {
-        const subCommand = interaction.data.options
-          ?.find((option) => option.name === 'get')
-
-        if (subCommand?.type !== 1) {
-          await interaction.result([])
-          return
-        }
-        const focusedOption = subCommand.options
-          ?.find((option) => 'focused' in option)
-        if (focusedOption?.type !== 3) {
-          await interaction.result([])
-          return
-        }
-
+      autocompleteAction: async (interaction, focusedOption) => {
         const suggestions = await autocompleteSuggestions(focusedOption.value)
         await interaction.result(suggestions.map((suggestion) => ({
           name: suggestion.id,
@@ -47,30 +34,13 @@ export const get: SubCommand = {
         })))
       },
     },
-  ],
-  action: async (interaction) => {
-    const subCommand = interaction.data.options
-      ?.find((option) => option.name === 'get')
+  ] as const,
+  action: async (interaction, args) => {
+    const tag = await getTag(args.name.value)
 
-    if (subCommand?.type !== 1) {
-      await interaction.createMessage('bork!')
-      return
-    }
-
-    const option = subCommand.options?.find((option) => option.name === 'name')
-
-    if (option?.type !== 3) {
-      await interaction.createMessage({
-        content: 'Please provide a tag name',
-        flags: 64,
-      })
-      return
-    }
-
-    const tag = await getTag(option.value)
     if (!tag) {
       await interaction.createMessage({
-        content: `Tag \`${option.value}\` doesn't exist`,
+        content: `Tag \`${args.name.value}\` doesn't exist`,
         flags: 64,
       })
       return
@@ -84,7 +54,7 @@ export const get: SubCommand = {
 
     await interaction.createMessage('', {
       file: await res.buffer(),
-      name: `${option.value}.${ext}`,
+      name: `${tag.id}.${ext}`,
     })
   },
-}
+})

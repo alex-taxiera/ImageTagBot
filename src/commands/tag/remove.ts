@@ -1,13 +1,13 @@
-import { SubCommand } from '@hephaestus/eris'
-import { autocompleteSuggestions } from '@tagger'
-import { ownTag } from '@permissions/own-tag'
-import { prisma } from '@utils/db'
+import { createCommand } from '@hephaestus/eris'
+import { autocompleteSuggestions } from '@modules/tagger'
+import { ownTag } from '@modules/permissions/own-tag'
+import { prisma } from '@modules/utils/db'
 
-export const remove: SubCommand = {
+export const remove = createCommand({
   type: 1,
   name: 'remove',
   description: 'Remove a tag',
-  permission: ownTag,
+  permission: ownTag('name'),
   options: [
     {
       type: 3,
@@ -15,21 +15,7 @@ export const remove: SubCommand = {
       description: 'The tag to remove',
       required: true,
       autocomplete: true,
-      autocompleteAction: async (interaction) => {
-        const subCommand = interaction.data.options
-          ?.find((option) => option.name === 'get')
-
-        if (subCommand?.type !== 1) {
-          await interaction.result([])
-          return
-        }
-        const focusedOption = subCommand.options
-          ?.find((option) => 'focused' in option)
-        if (focusedOption?.type !== 3) {
-          await interaction.result([])
-          return
-        }
-
+      autocompleteAction: async (interaction, focusedOption) => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const user = interaction.member?.user ?? interaction.user!
 
@@ -42,31 +28,13 @@ export const remove: SubCommand = {
         })))
       },
     },
-  ],
-  action: async (interaction) => {
-    const subCommand = interaction.data.options
-      ?.find((option) => option.name === 'get')
-
-    if (subCommand?.type !== 1) {
-      await interaction.createMessage('bork!')
-      return
-    }
-
-    const option = subCommand.options?.find((option) => option.name === 'name')
-
-    if (option?.type !== 3) {
-      await interaction.createMessage({
-        content: 'Please provide a tag name',
-        flags: 64,
-      })
-      return
-    }
-
-    await prisma.tag.delete({ where: { id: option.value } })
+  ] as const,
+  action: async (interaction, args) => {
+    await prisma.tag.delete({ where: { id: args.name.value } })
 
     await interaction.createMessage({
-      content: `Tag \`${option.value}\` removed`,
+      content: `Tag \`${args.name.value}\` removed`,
       flags: 64,
     })
   },
-}
+})

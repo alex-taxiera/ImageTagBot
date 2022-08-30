@@ -1,7 +1,7 @@
-import { SubCommand } from '@hephaestus/eris'
-import { prisma } from '@utils/db'
+import { createCommand } from '@hephaestus/eris'
+import { prisma } from '@modules/utils/db'
 
-export const mine: SubCommand = {
+export const mine = createCommand({
   type: 1,
   name: 'mine',
   description: 'List your tags',
@@ -30,4 +30,4 @@ export const mine: SubCommand = {
       ],
     })
   },
-}
+})

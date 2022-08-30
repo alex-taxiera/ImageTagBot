@@ -1,13 +1,13 @@
-import { SubCommand } from '@hephaestus/eris'
+import { createCommand } from '@hephaestus/eris'
 import {
   getTag,
   uploadToImgur,
   UploadValidationError,
   upsertTag,
-} from '@tagger'
-import { ImgurError } from '@tagger/exceptions'
+} from '@modules/tagger'
+import { ImgurError } from '@modules/tagger/exceptions'
 
-export const add: SubCommand = {
+export const add = createCommand({
   type: 1,
   name: 'add',
   description: 'Add a tag',
@@ -24,50 +24,30 @@ export const add: SubCommand = {
     //   description: 'The tag attachment',
     //   required: false,
     // },
-  ],
-  action: async (interaction) => {
-    const subCommand = interaction.data.options
-      ?.find((option) => option.name === 'add')
-
-    if (subCommand?.type !== 1) {
-      await interaction.createMessage('bork!')
-      return
-    }
-
-    const idOption = subCommand.options
-      ?.find((option) => option.name === 'id')
-
-    if (idOption?.type !== 3) {
-      await interaction.createMessage({
-        content: 'Please provide a tag id',
-        flags: 64,
-      })
-      return
-    }
-    const id = idOption.value
-    const urlOption = subCommand.options
-      ?.find((option) => option.name === 'url')
+  ] as const,
+  action: async (interaction, args) => {
+    // const id = args.id.value
 
     // const attachmentOption = subCommand.options
     //   ?.find((option) => option.name === 'attachment')
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    let url // = attachmentOption?.type === 11 ? attachmentOption.value : null
+    // const url = args.url.value // = attachmentOption?.type === 11 ? attachmentOption.value : null
 
-    if (url == null) {
-      if (urlOption?.type !== 3) {
-        await interaction.createMessage({
-          content: 'Please provide a url or attachment',
-          flags: 64,
-        })
-        return
-      }
-      url = urlOption.value
-    }
+    // if (url == null) {
+    //   if (urlOption?.type !== 3) {
+    //     await interaction.createMessage({
+    //       content: 'Please provide a url or attachment',
+    //       flags: 64,
+    //     })
+    //     return
+    //   }
+    //   url = urlOption.value
+    // }
 
-    const tag = await getTag(id)
+    const tag = await getTag(args.id.value)
     if (tag) {
       await interaction.createMessage({
-        content: `Tag \`${id}\` already exists`,
+        content: `Tag \`${args.id.value}\` already exists`,
         flags: 64,
       })
       return
@@ -76,7 +56,7 @@ export const add: SubCommand = {
     let newSrc: string | undefined
     try {
       await interaction.defer(64)
-      newSrc = await uploadToImgur(url)
+      newSrc = await uploadToImgur(args.url.value)
     } catch (e) {
       if (e instanceof ImgurError) {
         switch (e.code) {
@@ -108,12 +88,12 @@ export const add: SubCommand = {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const user = interaction.member?.user ?? interaction.user!
     await upsertTag({
-      id, user: user.id, src: newSrc,
+      id: args.id.value, user: user.id, src: newSrc,
     })
 
     await interaction.createMessage({
-      content: `Tag \`${id}\` added`,
+      content: `Tag \`${args.id.value}\` added`,
       flags: 64,
     })
   },
-}
+})

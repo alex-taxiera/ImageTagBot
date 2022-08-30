@@ -1,7 +1,7 @@
-import { SubCommand } from '@hephaestus/eris'
-import { prisma } from '@utils/db'
+import { createCommand } from '@hephaestus/eris'
+import { prisma } from '@modules/utils/db'
 
-export const top: SubCommand = {
+export const top = createCommand({
   type: 1,
   name: 'top',
   description: 'top 10 tags', // TODO: add sub commands for guild/user top 10 ("help top" for filters)
@@ -30,4 +30,4 @@ export const top: SubCommand = {
       ],
     })
   },
-}
+})

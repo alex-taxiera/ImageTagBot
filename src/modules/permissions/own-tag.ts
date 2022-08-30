@@ -1,13 +1,13 @@
 import { Permission } from '@hephaestus/eris'
-import { getTag } from '@tagger'
+import { getTag } from '@modules/tagger'
 
-export const ownTag: Permission = {
+export const ownTag = (key: string): Permission => ({
   name: 'ownTag',
   level: 800,
   reason: 'You do not own this tag!',
   action: async (interaction) => {
     const option = interaction.data.options
-      ?.find((option) => option.name === 'id')
+      ?.find((option) => option.name === key)
 
     if (option?.type !== 3) {
       return false
@@ -30,4 +30,4 @@ export const ownTag: Permission = {
 
     return user.id === tag?.user
   },
-}
+})

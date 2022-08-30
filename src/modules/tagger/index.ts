@@ -7,9 +7,9 @@ import {
   ImgurError,
   ImgurException,
 } from './exceptions'
-import { streamFromBuffer } from '@file'
+import { streamFromBuffer } from '@modules/file'
 
-import { prisma } from '@utils/db'
+import { prisma } from '@modules/utils/db'
 import { Tag } from '@prisma/client'
 
 export const validTypes = [ 'image', 'video' ] as const
@@ -124,10 +124,17 @@ export async function autocompleteSuggestions (
   id: string,
   userId?: string,
 ): Promise<Tag[]> {
-  return await prisma.tag.findMany({
-    where: { id: { contains: id }, user: userId },
+  const exact = await getTag(id)
+  const similar = await prisma.tag.findMany({
+    where: { id: { contains: id, not: id }, user: userId },
     take: 25, // limited for discord autocomplete
   })
+
+  if (exact) {
+    return [ exact, ...similar.slice(24) ]
+  }
+
+  return similar
 }
 
 export async function incrementTagCount (

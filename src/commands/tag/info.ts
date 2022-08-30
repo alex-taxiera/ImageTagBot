@@ -1,12 +1,13 @@
-import { SubCommand } from '@hephaestus/eris'
+import { createCommand } from '@hephaestus/eris'
 
 import {
   getTag,
   IMAGE_REGEXP,
   autocompleteSuggestions,
-} from '@tagger'
+} from '@modules/tagger'
 
-export const info: SubCommand = {
+export const info = createCommand({
+  guildId: '436591833196265473',
   type: 1,
   name: 'info',
   description: 'Get info on a tag.',
@@ -17,21 +18,7 @@ export const info: SubCommand = {
       description: 'The tag to get info on',
       required: true,
       autocomplete: true,
-      autocompleteAction: async (interaction) => {
-        const subCommand = interaction.data.options
-          ?.find((option) => option.name === 'get')
-
-        if (subCommand?.type !== 1) {
-          await interaction.result([])
-          return
-        }
-        const focusedOption = subCommand.options
-          ?.find((option) => 'focused' in option)
-        if (focusedOption?.type !== 3) {
-          await interaction.result([])
-          return
-        }
-
+      autocompleteAction: async (interaction, focusedOption) => {
         const suggestions = await autocompleteSuggestions(focusedOption.value)
         await interaction.result(suggestions.map((suggestion) => ({
           name: suggestion.id,
@@ -39,36 +26,18 @@ export const info: SubCommand = {
         })))
       },
     },
-  ],
-  action: async (interaction, client) => {
-    const subCommand = interaction.data.options
-      ?.find((option) => option.name === 'info')
-
-    if (subCommand?.type !== 1) {
-      await interaction.createMessage('bork!')
-      return
-    }
-
-    const option = subCommand.options?.find((option) => option.name === 'name')
-
-    if (option?.type !== 3) {
-      await interaction.createMessage({
-        content: 'Please provide a tag name',
-        flags: 64,
-      })
-      return
-    }
-
-    const tag = await getTag(option.value)
+  ] as const,
+  action: async (interaction, args, heph) => {
+    const tag = await getTag(args.name.value)
     if (!tag) {
       await interaction.createMessage({
-        content: `Tag \`${option.value}\` doesn't exist`,
+        content: `Tag \`${args.name.value}\` doesn't exist`,
         flags: 64,
       })
       return
     }
 
-    const user = await client.getRESTUser(tag.user)
+    const user = await heph.client.getRESTUser(tag.user)
 
     await interaction.createMessage({
       embeds: [
@@ -98,4 +67,4 @@ export const info: SubCommand = {
       ],
     })
   },
-}
+})
