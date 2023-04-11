@@ -10,7 +10,7 @@ import {
 import { streamFromBuffer } from '@modules/file'
 
 import { prisma } from '@modules/utils/db'
-import { Tag } from '@prisma/client'
+import type { Tag } from '@prisma/client'
 
 export const validTypes = [ 'image', 'video' ] as const
 

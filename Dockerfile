@@ -22,8 +22,7 @@ RUN export NODE_ENV=production
 COPY package.json package-lock.json ./
 RUN npm run install:prod
 
-COPY prisma prisma
-
+# COPY prisma /app/prisma
 COPY --from=build /app/dist /app
 
 
