@@ -8,7 +8,6 @@ RUN npm install
 COPY prisma prisma
 RUN npx prisma generate
 
-COPY config config
 COPY src src
 COPY ./tsconfig.json ./tsconfig.json
 RUN npm run build
@@ -17,14 +16,14 @@ RUN npm run build
 FROM node:16-alpine
 
 WORKDIR /app
-RUN export NODE_ENV=production
+ENV NODE_ENV=production
 
 COPY package.json package-lock.json ./
 RUN npm run install:prod
 
-COPY --from=build /app/dist ./
+COPY --from=build /app/dist/src ./
 COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=build /app/config ./config
+COPY config config
 
 
 CMD ["npm", "run", "start:prod"]
