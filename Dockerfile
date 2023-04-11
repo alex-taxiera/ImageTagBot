@@ -1,4 +1,4 @@
-FROM node:16 AS build
+FROM node:16-alpine AS build
 
 WORKDIR /app
 
@@ -22,8 +22,9 @@ RUN export NODE_ENV=production
 COPY package.json package-lock.json ./
 RUN npm run install:prod
 
-# COPY prisma /app/prisma
-COPY --from=build /app/dist /app
+COPY --from=build /app/dist ./
+COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=build /app/config ./config
 
 
 CMD ["npm", "run", "start:prod"]

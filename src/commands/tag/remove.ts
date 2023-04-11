@@ -1,7 +1,7 @@
 import { createCommand } from '@hephaestus/eris'
-import { autocompleteSuggestions } from '@modules/tagger'
-import { ownTag } from '@modules/permissions/own-tag'
-import { prisma } from '@modules/utils/db'
+import { autocompleteSuggestions } from '~modules/tagger'
+import { ownTag } from '~modules/permissions/own-tag'
+import { prisma } from '~modules/utils/db'
 
 export const remove = createCommand({
   type: 1,

@@ -10,7 +10,7 @@ import {
 } from 'path'
 import { fileURLToPath } from 'url'
 import type { Status } from '@prisma/client'
-import { prisma } from '@modules/utils/db'
+import { prisma } from '~modules/utils/db'
 
 main().catch(() => undefined)// .finally(async () => await prisma.$disconnect())
 

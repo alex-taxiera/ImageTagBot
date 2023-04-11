@@ -88,12 +88,12 @@ jobs:
         uses: actions/checkout@master
       -
         name: Setup Node.JS
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
       -
         name: Dependency Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             **/node_modules

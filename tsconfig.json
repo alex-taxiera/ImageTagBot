@@ -19,13 +19,13 @@
     "noUncheckedIndexedAccess": true,
     "baseUrl": "./src",
     "paths": {
-      "@*": [
+      "~*": [
         "./*"
       ]
     },
     "plugins": [
       {
-        "transform": "@ovos-media/ts-transform-paths"
+        "transform": "typescript-transform-paths"
       }
     ]
   }

@@ -7,9 +7,9 @@ import {
   ImgurError,
   ImgurException,
 } from './exceptions'
-import { streamFromBuffer } from '@modules/file'
+import { streamFromBuffer } from '~modules/file'
 
-import { prisma } from '@modules/utils/db'
+import { prisma } from '~modules/utils/db'
 import type { Tag } from '@prisma/client'
 
 export const validTypes = [ 'image', 'video' ] as const

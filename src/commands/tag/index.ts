@@ -1,7 +1,7 @@
 import { createCommand } from '@hephaestus/eris'
 
-import { cooldownMiddlewareFactory } from '@modules/cooldown/middleware'
-import { CooldownHandler } from '@modules/cooldown/CooldownHandler'
+import { cooldownMiddlewareFactory } from '~modules/cooldown/middleware'
+import { CooldownHandler } from '~modules/cooldown/CooldownHandler'
 
 import { add } from './add'
 import { get } from './get'

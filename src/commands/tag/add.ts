@@ -4,8 +4,8 @@ import {
   uploadToImgur,
   UploadValidationError,
   upsertTag,
-} from '@modules/tagger'
-import { ImgurError } from '@modules/tagger/exceptions'
+} from '~modules/tagger'
+import { ImgurError } from '~modules/tagger/exceptions'
 
 export const add = createCommand({
   type: 1,

@@ -1,5 +1,5 @@
 import { Permission } from '@hephaestus/eris'
-import { getTag } from '@modules/tagger'
+import { getTag } from '~modules/tagger'
 
 export const ownTag = (key: string): Permission => ({
   name: 'ownTag',

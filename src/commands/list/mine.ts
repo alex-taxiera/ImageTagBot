@@ -1,5 +1,5 @@
 import { createCommand } from '@hephaestus/eris'
-import { prisma } from '@modules/utils/db'
+import { prisma } from '~modules/utils/db'
 
 export const mine = createCommand({
   type: 1,

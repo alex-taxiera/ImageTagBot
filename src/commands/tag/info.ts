@@ -4,7 +4,7 @@ import {
   getTag,
   IMAGE_REGEXP,
   autocompleteSuggestions,
-} from '@modules/tagger'
+} from '~modules/tagger'
 
 export const info = createCommand({
   guildId: '436591833196265473',

@@ -2,14 +2,14 @@ import fetch from 'node-fetch'
 
 import { createCommand } from '@hephaestus/eris'
 
-import { cooldownMiddlewareFactory } from '@modules/cooldown/middleware'
-import { CooldownHandler } from '@modules/cooldown/CooldownHandler'
+import { cooldownMiddlewareFactory } from '~modules/cooldown/middleware'
+import { CooldownHandler } from '~modules/cooldown/CooldownHandler'
 import {
   getTag,
   IMAGE_REGEXP,
   incrementTagCount,
   autocompleteSuggestions,
-} from '@modules/tagger'
+} from '~modules/tagger'
 
 export const get = createCommand({
   guildId: '436591833196265473',
