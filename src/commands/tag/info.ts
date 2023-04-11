@@ -7,7 +7,6 @@ import {
 } from '~modules/tagger'
 
 export const info = createCommand({
-  guildId: '436591833196265473',
   type: 1,
   name: 'info',
   description: 'Get info on a tag.',

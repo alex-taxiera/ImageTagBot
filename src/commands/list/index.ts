@@ -3,7 +3,6 @@ import { mine } from './mine'
 import { top } from './top'
 
 const list = createCommand({
-  guildId: '436591833196265473',
   type: 1,
   name: 'list',
   description: 'List tags.',

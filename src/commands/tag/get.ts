@@ -12,7 +12,6 @@ import {
 } from '~modules/tagger'
 
 export const get = createCommand({
-  guildId: '436591833196265473',
   type: 1,
   name: 'get',
   description: 'Finds, Adds, Remove, or Edit tags',
