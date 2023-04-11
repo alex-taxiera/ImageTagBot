@@ -23,7 +23,6 @@ COPY package.json package-lock.json ./
 RUN npm run install:prod
 
 COPY prisma prisma
-RUN npx prisma generate
 
 COPY --from=build /app/dist /app
 
