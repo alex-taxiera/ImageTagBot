@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import FormData from 'form-data'
 import { fileTypeFromBuffer } from 'file-type'
 import fetch from 'node-fetch'
@@ -124,11 +125,14 @@ export async function autocompleteSuggestions (
   id: string,
   userId?: string,
 ): Promise<Tag[]> {
+  console.log('autocomplete', 'id :', id, 'userId :', userId)
   const exact = await getTag(id)
+  console.log('exact :', exact)
   const similar = await prisma.tag.findMany({
     where: { id: { contains: id, not: id }, user: userId },
     take: 25, // limited for discord autocomplete
   })
+  console.log('similar :', similar)
 
   if (exact) {
     return [ exact, ...similar.slice(24) ]
