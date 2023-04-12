@@ -12,7 +12,7 @@ import { fileURLToPath } from 'url'
 import type { Status } from '@prisma/client'
 import { prisma } from '~modules/utils/db'
 
-main().catch(() => undefined)// .finally(async () => await prisma.$disconnect())
+main().catch(console.error)// .finally(async () => await prisma.$disconnect())
 
 async function main (): Promise<void> {
   const hephaestus = new Hephaestus(
@@ -22,9 +22,8 @@ async function main (): Promise<void> {
   hephaestus.commands.forge(
     join(dirname(fileURLToPath(import.meta.url)), 'commands'),
   )
-  // eslint-disable-next-line no-console
   await hephaestus.connect().catch(console.error)
-  void manageStatus(hephaestus.client)
+  return await manageStatus(hephaestus.client)
 }
 
 async function manageStatus (client: Client): Promise<void> {

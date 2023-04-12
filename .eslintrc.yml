@@ -18,3 +18,10 @@ overrides:
         - ./tsconfig.json
     extends:
       - '@alex-taxiera/eslint-config-ts'
+    rules:
+      no-console:
+        - error
+        -
+          allow:
+            - error
+            - warn

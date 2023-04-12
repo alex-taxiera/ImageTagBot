@@ -15,7 +15,7 @@
     "validate:build": "npm run build -- --noEmit"
   },
   "dependencies": {
-    "@hephaestus/eris": "^1.0.0-alpha.22",
+    "@hephaestus/eris": "^1.0.0-alpha.23",
     "@prisma/client": "^4.12.0",
     "config": "^3.3.7",
     "docker-secret-env": "^0.2.1",
@@ -27,6 +27,7 @@
   "devDependencies": {
     "@alex-taxiera/eslint-config-cjs": "^1.1.1",
     "@alex-taxiera/eslint-config-ts": "^2.0.1",
+    "@tsconfig/node16": "^1.0.3",
     "@types/config": "^0.0.41",
     "@types/node": "~16.11.43",
     "@types/node-fetch": "^2.6.2",

@@ -1,15 +1,20 @@
+import { InteractionDataOptions } from 'eris'
 import { Permission } from '@hephaestus/eris'
 import { getTag } from '~modules/tagger'
+import { unknownHasKey } from '~utils/unknown-has-key'
 
 export const ownTag = (key: string): Permission => ({
   name: 'ownTag',
   level: 800,
   reason: 'You do not own this tag!',
-  action: async (interaction) => {
-    const option = interaction.data.options
-      ?.find((option) => option.name === key)
+  action: async (interaction, options) => {
+    if (!unknownHasKey(options, key)) {
+      return false
+    }
 
-    if (option?.type !== 3) {
+    const option = options[key] as InteractionDataOptions
+
+    if (option.type !== 3) {
       return false
     }
 
