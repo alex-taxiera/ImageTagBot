@@ -47,12 +47,15 @@ export const get = createCommand({
     }
 
     const res = await fetch(tag.src)
+    const file = await res.buffer()
+    log.debug(tag)
+    log.debug('get file', file)
     const ext = IMAGE_REGEXP.exec(tag.src.toLowerCase())?.pop() ?? ''
     incrementTagCount(tag.id)
       .catch((error) => log.error('failed to count', error))
 
     await interaction.createMessage('', {
-      file: await res.buffer(),
+      file,
       name: `${tag.id}.${ext}`,
     })
   },
