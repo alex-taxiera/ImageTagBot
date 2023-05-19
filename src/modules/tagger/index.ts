@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import FormData from 'form-data'
 import { fileTypeFromBuffer } from 'file-type'
 import fetch from 'node-fetch'
@@ -12,6 +11,7 @@ import { streamFromBuffer } from '~modules/file'
 
 import { prisma } from '~modules/utils/db'
 import type { Tag } from '@prisma/client'
+import { log } from '~modules/logger'
 
 export const validTypes = [ 'image', 'video' ] as const
 
@@ -71,6 +71,7 @@ export async function uploadToImgur (
   } = body
 
   if (error) {
+    log.debug(error)
     throw new ImgurError(error)
   } else if (link == null) {
     throw Error('No Link')

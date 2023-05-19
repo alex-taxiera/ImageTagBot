@@ -10,6 +10,7 @@ import {
   incrementTagCount,
   autocompleteSuggestions,
 } from '~modules/tagger'
+import { log } from '~modules/logger'
 
 export const get = createCommand({
   type: 1,
@@ -48,8 +49,7 @@ export const get = createCommand({
     const res = await fetch(tag.src)
     const ext = IMAGE_REGEXP.exec(tag.src.toLowerCase())?.pop() ?? ''
     incrementTagCount(tag.id)
-      // eslint-disable-next-line no-console
-      .catch((error) => console.error('failed to count', error))
+      .catch((error) => log.error('failed to count', error))
 
     await interaction.createMessage('', {
       file: await res.buffer(),

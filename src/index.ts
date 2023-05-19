@@ -11,8 +11,9 @@ import {
 import { fileURLToPath } from 'url'
 import type { Status } from '@prisma/client'
 import { prisma } from '~modules/utils/db'
+import { log } from '~modules/logger'
 
-main().catch(console.error)// .finally(async () => await prisma.$disconnect())
+main().catch(log.critical)// .finally(async () => await prisma.$disconnect())
 
 async function main (): Promise<void> {
   const hephaestus = new Hephaestus(
@@ -22,7 +23,7 @@ async function main (): Promise<void> {
   hephaestus.commands.forge(
     join(dirname(fileURLToPath(import.meta.url)), 'commands'),
   )
-  await hephaestus.connect().catch(console.error)
+  await hephaestus.connect().catch(log.critical)
   return await manageStatus(hephaestus.client)
 }
 
@@ -45,8 +46,7 @@ async function manageStatus (client: Client): Promise<void> {
     })
     if (nextStatus) {
       current = nextStatus
-      // eslint-disable-next-line no-console
-      console.log(`${STATUS_TYPES[nextStatus.type] ?? ''} ${nextStatus.name}`)
+      log.info(`${STATUS_TYPES[nextStatus.type] ?? ''} ${nextStatus.name}`)
       client.editStatus({
         ...nextStatus,
         type: nextStatus.type as BotActivityType,

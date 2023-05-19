@@ -2,6 +2,7 @@ import { InteractionDataOptions } from 'eris'
 import { Permission } from '@hephaestus/eris'
 import { getTag } from '~modules/tagger'
 import { unknownHasKey } from '~utils/unknown-has-key'
+import { log } from '~modules/logger'
 
 export const ownTag = (key: string): Permission => ({
   name: 'ownTag',
@@ -30,6 +31,7 @@ export const ownTag = (key: string): Permission => ({
     try {
       tag = await getTag(id)
     } catch (error) {
+      log.debug(error)
       return false
     }
 
