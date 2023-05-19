@@ -17,11 +17,45 @@ export const validTypes = [ 'image', 'video' ] as const
 
 export class UploadValidationError extends Error {}
 
-const API_URL = 'https://api.imgur.com/3'
+const SHARE_API_URL = 'https://share.taxiera.link'
+
+const IMGUR_API_URL = 'https://api.imgur.com/3'
 
 const imgurClientId: string = config.get('IMGUR_CLIENT_ID')
 
 export const IMAGE_REGEXP = /^(?:https|http):?\/.*\.(\w+)/
+
+export async function uploadToShare (
+  src: string,
+  userId: string,
+): Promise<string> {
+  const data = await fetch(src).then(async (res) => await res.buffer())
+  const metadata = await fileTypeFromBuffer(data)
+
+  if (
+    !metadata ||
+    validTypes.every((type) => !metadata.mime.startsWith(type))
+  ) {
+    throw new UploadValidationError('Not an image or video!')
+  }
+
+  const size = Buffer.byteLength(data)
+
+  if (size > 1024 * 1024 * (metadata.mime.startsWith('image') ? 100 : 500)) {
+    throw new UploadValidationError('File is too big!')
+  }
+
+  const res = await fetch(`${SHARE_API_URL}/${userId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': metadata.mime,
+      'Content-Length': size.toString(),
+    },
+    body: data,
+  })
+
+  return await res.text()
+}
 
 export async function uploadToImgur (
   src: string,
@@ -55,7 +89,7 @@ export async function uploadToImgur (
   })
   form.append('type', 'file')
 
-  const body = await fetch(`${API_URL}/upload`, {
+  const body = await fetch(`${IMGUR_API_URL}/upload`, {
     method: 'POST',
     headers: {
       ...form.getHeaders(),

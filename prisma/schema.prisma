@@ -8,26 +8,27 @@ datasource db {
 }
 
 model Guild {
-  id     String  @id
-  prefix String?
-  vip    String?
+  id     String  @id @db.VarChar(255)
+  prefix String? @db.VarChar(255)
+  vip    String? @db.VarChar(255)
 
   @@map("guild")
 }
 
 model Status {
   id   Int    @id @default(autoincrement())
-  name String
+  name String @db.VarChar(255)
   type Int    @default(0)
 
   @@map("status")
 }
 
 model Tag {
-  id    String @id @db.Citext
-  user  String
-  src   String
-  count Int    @default(0)
+  id       String  @id @db.Citext
+  user     String  @db.VarChar(255)
+  src      String  @db.VarChar(255)
+  imgurSrc String? @db.VarChar(255)
+  count    Int     @default(0)
 
   @@map("tag")
 }

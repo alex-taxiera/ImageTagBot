@@ -1,11 +1,9 @@
 import { createCommand } from '@hephaestus/eris'
 import {
   getTag,
-  uploadToImgur,
-  UploadValidationError,
+  uploadToShare,
   upsertTag,
 } from '~modules/tagger'
-import { ImgurError } from '~modules/tagger/exceptions'
 
 export const add = createCommand({
   type: 1,
@@ -53,40 +51,51 @@ export const add = createCommand({
       return
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const user = interaction.member?.user ?? interaction.user!
+
     let newSrc: string | undefined
     try {
       await interaction.defer(64)
-      newSrc = await uploadToImgur(args.url.value)
-    } catch (e) {
-      if (e instanceof ImgurError) {
-        switch (e.code) {
-          case 1003: {
-            await interaction.createMessage({
-              content: 'Tag url is not an image',
-              flags: 64,
-            })
-            return
-          }
-          default: {
-            await interaction.createMessage({
-              content: 'Failed to upload tag',
-              flags: 64,
-            })
-            return
-          }
-        }
-      } else if (e instanceof UploadValidationError) {
-        await interaction.createMessage({
-          content: e.message,
-          flags: 64,
-        })
-        return
-      } else {
-        throw e
-      }
+      newSrc = await uploadToShare(args.url.value, user.id)
+    } catch (error) {
+      await interaction.createMessage({
+        content: 'Failed to upload tag',
+        flags: 64,
+      })
+      return
     }
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const user = interaction.member?.user ?? interaction.user!
+    // try {
+    //   await interaction.defer(64)
+    //   newSrc = await uploadToImgur(args.url.value)
+    // } catch (e) {
+    //   if (e instanceof ImgurError) {
+    //     switch (e.code) {
+    //       case 1003: {
+    //         await interaction.createMessage({
+    //           content: 'Tag url is not an image',
+    //           flags: 64,
+    //         })
+    //         return
+    //       }
+    //       default: {
+    //         await interaction.createMessage({
+    //           content: 'Failed to upload tag',
+    //           flags: 64,
+    //         })
+    //         return
+    //       }
+    //     }
+    //   } else if (e instanceof UploadValidationError) {
+    //     await interaction.createMessage({
+    //       content: e.message,
+    //       flags: 64,
+    //     })
+    //     return
+    //   } else {
+    //     throw e
+    //   }
+    // }
     await upsertTag({
       id: args.id.value, user: user.id, src: newSrc,
     })

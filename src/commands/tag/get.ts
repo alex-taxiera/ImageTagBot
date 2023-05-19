@@ -6,7 +6,6 @@ import { cooldownMiddlewareFactory } from '~modules/cooldown/middleware'
 import { CooldownHandler } from '~modules/cooldown/CooldownHandler'
 import {
   getTag,
-  IMAGE_REGEXP,
   incrementTagCount,
   autocompleteSuggestions,
 } from '~modules/tagger'
@@ -48,11 +47,15 @@ export const get = createCommand({
 
     const res = await fetch(tag.src)
     const file = await res.buffer()
+
     log.debug(res)
     log.debug(res.body)
     log.debug(tag)
     log.debug('get file', file)
-    const ext = IMAGE_REGEXP.exec(tag.src.toLowerCase())?.pop() ?? ''
+    log.debug(res.headers.get('content-type'))
+
+    const ext = res.headers.get('content-type')?.split('/').pop() ?? ''
+
     incrementTagCount(tag.id)
       .catch((error) => log.error('failed to count', error))
 
