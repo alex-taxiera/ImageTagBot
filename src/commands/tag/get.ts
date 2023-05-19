@@ -48,6 +48,8 @@ export const get = createCommand({
 
     const res = await fetch(tag.src)
     const file = await res.buffer()
+    log.debug(res)
+    log.debug(res.body)
     log.debug(tag)
     log.debug('get file', file)
     const ext = IMAGE_REGEXP.exec(tag.src.toLowerCase())?.pop() ?? ''
