@@ -12,7 +12,7 @@ const colors: Record<string, ChalkInstance> = {
 }
 
 prefix.reg(log)
-log.setDefaultLevel(config.get('LOG_LEVEL') ?? 'info')
+log.setDefaultLevel(config.has('LOG_LEVEL') ? config.get('LOG_LEVEL') : 'info')
 
 prefix.apply(log, {
   format: (level, _, timestamp) => {
