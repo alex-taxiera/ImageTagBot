@@ -22,6 +22,7 @@ COPY package.json package-lock.json ./
 RUN npm run install:prod
 
 COPY --from=build /app/dist/src ./
+COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
 COPY config/production.cjs config/production.cjs
 
