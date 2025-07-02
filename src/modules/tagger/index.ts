@@ -17,7 +17,7 @@ export const validTypes = [ 'image', 'video' ] as const
 
 export class UploadValidationError extends Error {}
 
-const SHARE_API_URL = 'https://share.taxiera.link'
+const SHARE_API_URL = 'https://share.taxiera.net'
 
 const IMGUR_API_URL = 'https://api.imgur.com/3'
 
@@ -149,7 +149,12 @@ export async function upsertTag (
 }
 
 export async function getTag (id: string): Promise<Tag | null> {
-  return await prisma.tag.findUnique({ where: { id } })
+  const tag = await prisma.tag.findUnique({ where: { id } })
+  if (tag) {
+    tag.src = tag.src.replace('https://share.taxiera.link', SHARE_API_URL)
+  }
+
+  return tag
 }
 
 export async function getTagsForUser (user: string): Promise<Tag[]> {
